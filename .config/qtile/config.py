@@ -18,7 +18,7 @@
 
 from libqtile.config import Key, Screen, Group, Drag, Click, DropDown, ScratchPad, Match
 from libqtile.command import lazy
-from libqtile import layout, bar, widget, extension
+from libqtile import layout, bar, widget, extension, hook
 from libqtile.log_utils import logger
 import re
 import subprocess
@@ -298,3 +298,9 @@ focus_on_window_activation = "smart"
 # We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
 # java that happens to be on java's whitelist.
 wmname = "LG3D"
+
+@hook.subscribe.startup
+def autostart():
+    path = os.path.expanduser('~/bin/startup.sh')
+    subprocess.call([path])
+
