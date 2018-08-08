@@ -1,0 +1,5 @@
+set split-view-width = 65%
+set status-show-untracked-files = yes
+
+bind generic <Space> enter
+

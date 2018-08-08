@@ -1,0 +1,31 @@
+[user]
+	name = neworld
+	email = aneworld@gmail.com
+
+[includeif "gitdir:~/projects/vinted"]
+	path = ~/.gitconfig-vinted
+
+[color]
+	ui = true
+[alias]
+	tree = log --oneline --graph --color --all --decorate
+	assume-unchanged = update-index --assume-unchanged
+	assume-changed = update-index --no-assume-unchanged
+	lastmodified = log -1 --format=%ad --
+	commend = commit --amend --no-edit
+	please = push --force-with-lease
+	it = !git init && git commit -m “root” --allow-empty
+	shorty = status --short --branch
+[core]
+	excludesfile = ~/.gitignore_global
+[branch]
+	autosetuprebase = always
+[branch "master"]
+	rebase = true
+[rebase]
+	stat = true
+[push]
+	default = current
+[web]
+	browser = open
+	
