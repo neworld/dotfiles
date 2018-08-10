@@ -1,11 +1,11 @@
-Xft.dpi: 200
+Xft.dpi: 230
 Xft.autohint: 0
 Xft.rgba: rgb
 
 XTerm.vt100.faceName: DejaVu Sans Mono:style=Book:Antialias=false
-XTerm.vt100.faceSize: 12
+XTerm.vt100.faceSize: 9
 
-URxvt.font: xft:monospace:size=10
+URxvt.font: xft:monospace:size=9
 
 #####################
 

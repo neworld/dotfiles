@@ -29,18 +29,18 @@ shift = "shift"
 ctrl = "control"
 alt = "mod1"
 
-workspaces = [
-        ('1', 'F1'),
-        ('2', 'F2'),
-        ('3', 'F3'),
-        ('4', 'F4'),
-]
-
 def spawn_bin(program):
     @lazy.function
     def __inner(qtile):
         full_path = os.path.expanduser('~/bin/' + program)
         qtile.cmd_spawn(full_path)
+
+    return __inner
+
+def switch_group(index):
+    @lazy.function
+    def __inner(qtile):
+        qtile.groups[index].cmd_toscreen()
 
     return __inner
 
@@ -119,7 +119,7 @@ class Commands(object):
     volume_toggle = 'amixer -q set Master toggle'
 
 keys = [
-    Key([mod], "space", lazy.next_layout()),
+    Key([mod, alt], "space", lazy.next_layout()),
 
     Key([mod], "Return", lazy.spawn("urxvt")),
 
@@ -129,8 +129,8 @@ keys = [
     Key([mod, "control"], "q", lazy.shutdown()),
     Key([mod], "r", lazy.spawncmd()),
 
-    Key([mod], "Right", lazy.screen.next_group()),
-    Key([mod], "Left", lazy.screen.prev_group()),
+    Key([mod], "Right", lazy.screen.next_group(skip_managed=True)),
+    Key([mod], "Left", lazy.screen.prev_group(skip_managed=True)),
     Key([mod, shift], "Right", window_to_next_group()),
     Key([mod, shift], "Left", window_to_prev_group()),
 
@@ -160,7 +160,7 @@ keys = [
         dmenu_ignorecase = True,
     ))),
 
-    Key([mod], 'z', switch_language()),
+    Key([mod], 'space', switch_language()),
     
     Key([mod], '1', spawn_bin('screen_clip.sh')),
     Key([mod], '2', spawn_bin('screen_file.sh')),
@@ -172,12 +172,9 @@ groups = [
         ScratchPad("scratchpad", [
             DropDown("term", "urxvt -e zsh -c byobu", opacity=0.8, width=1.0, x=0.0, height=0.6)
         ]),
+        Group("1"),
+        Group("2"),
 ]
-
-for workspace, hotkey in workspaces:
-    groups.append(Group(workspace))
-    keys.append(Key([mod], hotkey, lazy.group[workspace].toscreen()))
-
 
 group_www = "www"
 group_android = "android"
@@ -188,27 +185,33 @@ groups.append(Group(group_www,
     matches=[Match(wm_class=["Google-chrome"])], 
     spawn="google-chrome-stable", 
     init=True, 
-    layout="max",
     persist=False,
+    position=0,
 ))
 
 groups.append(Group(group_android,
     matches=[Match(wm_class=["jetbrains-studio"], title=["Android Emulator - "])], 
-    layout="monadtall",
     persist=False,
+    init=False,
+    position=1,
 ))
 
 groups.append(Group(group_chat,
     matches=[Match(wm_class=["Slack"])], 
-    layout="max",
     persist=False,
+    init=False,
+    position=2,
 ))
 
 groups.append(Group(group_music,
     matches=[Match(wm_class=["Spotify", "vlc"])], 
-    layout="max",
     persist=False,
+    init=False,
+    position=3,
 ))
+
+for index, key in enumerate(['F1', 'F2', 'F3', 'F4', 'F5']):
+    keys.append(Key([mod], key, switch_group(index)))
 
 layouts = [
     layout.MonadTall(border_focus='#a54242'),
@@ -241,10 +244,10 @@ screens = [
                 widget.MemoryGraph(graph_color='85678f'),
                 widget.NetGraph(graph_color='de935f'),
                 widget.ThermalSensor(),
-                widget.Wlan(),
+                widget.Wlan(interface='wlp59s0'),
                 widget.Volume(),
                 widget.YahooWeather(location='Vilnius'),
-                widget.Systray(),
+                widget.Systray(icon_size=40, padding=0),
                 widget.Spacer(length=16),
                 widget.Clock(format='%Y-%m-%d %a %H:%M'),
                 widget.CurrentLayoutIcon(),

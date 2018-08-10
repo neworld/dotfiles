@@ -4,4 +4,3 @@ alias pbpaste="xclip -o"
 alias vpn-on="sudo systemctl start openvpn-client@vpn_vinted"
 alias vpn-off="sudo systemctl stop openvpn-client@vpn_vinted"
 
-alias android-studio-safe="XMODIFIERS=  android-studio"
