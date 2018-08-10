@@ -122,6 +122,7 @@ keys = [
     Key([mod, alt], "space", lazy.next_layout()),
 
     Key([mod], "Return", lazy.spawn("urxvt")),
+    Key([mod], "f", lazy.spawn("thunar")),
 
     Key([mod], "q", lazy.window.kill()),
 
@@ -224,6 +225,8 @@ widget_defaults = dict(
     padding=3,
 )
 
+bolder_font = "DejaVu sans Bold"
+
 extension_defaults = widget_defaults.copy()
 
 screens = [
@@ -236,19 +239,17 @@ screens = [
                 widget.WindowName(),
 
                 widget.KeyboardLayout(configured_keyboards=['us','lt']),
+                widget.Battery(font=bolder_font),
                 widget.Backlight(
-                    backlight_name = 'intel_backlight'    
+                    backlight_name = 'intel_backlight',
                 ),
-                widget.Battery(),
                 widget.CPUGraph(),
                 widget.MemoryGraph(graph_color='85678f'),
                 widget.NetGraph(graph_color='de935f'),
                 widget.ThermalSensor(),
-                widget.Wlan(interface='wlp59s0'),
+                widget.Wlan(interface='wlp59s0', font=bolder_font),
                 widget.Volume(),
-                widget.YahooWeather(location='Vilnius'),
                 widget.Systray(icon_size=40, padding=0),
-                widget.Spacer(length=16),
                 widget.Clock(format='%Y-%m-%d %a %H:%M'),
                 widget.CurrentLayoutIcon(),
             ],

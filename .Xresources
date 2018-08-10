@@ -6,6 +6,8 @@ XTerm.vt100.faceName: DejaVu Sans Mono:style=Book:Antialias=false
 XTerm.vt100.faceSize: 9
 
 URxvt.font: xft:monospace:size=9
+URxvt.iso14755: true
+URxvt.iso14755_52: false
 
 #####################
 
