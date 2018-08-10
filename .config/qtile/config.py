@@ -123,7 +123,7 @@ keys = [
 
     Key([mod], "Return", lazy.spawn("urxvt")),
 
-    Key([mod], "w", lazy.window.kill()),
+    Key([mod], "q", lazy.window.kill()),
 
     Key([mod, "control"], "r", lazy.restart()),
     Key([mod, "control"], "q", lazy.shutdown()),

@@ -3,10 +3,10 @@ unbind-key -n C-a
 #set -g prefix2 F12
 #bind a send-prefixi
 
-bind-key -n M-Left previous-window
-bind-key -n M-right next-window
-bind-key -n M-t new-window
-bind-key -n M-Down new-window
+bind-key -n C-M-Left previous-window
+bind-key -n C-M-right next-window
+bind-key -n C-t new-window
+bind-key -n C-M-Down new-window
 unbind-key -n F1
 unbind-key -n F2
 unbind-key -n F3
