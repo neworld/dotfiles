@@ -20,6 +20,7 @@ from libqtile.config import Key, Screen, Group, Drag, Click, DropDown, ScratchPa
 from libqtile.command import lazy
 from libqtile import layout, bar, widget, extension, hook
 from libqtile.log_utils import logger
+from libqtile.widget import base
 import re
 import subprocess
 import os
@@ -29,10 +30,20 @@ shift = "shift"
 ctrl = "control"
 alt = "mod1"
 
+color_green = "#568c3b"
+color_red = '#d22d72'
+color_yellow = '#8a8a0f'
+color_blue = '#257fad'
+color_magenta = '#5d5db1'
+color_cyan = '#2d8f6f'
+
+HOME = os.path.expanduser('~')
+BIN = HOME + "/bin"
+
 def spawn_bin(program):
     @lazy.function
     def __inner(qtile):
-        full_path = os.path.expanduser('~/bin/' + program)
+        full_path = BIN + "/" + program
         qtile.cmd_spawn(full_path)
 
     return __inner
@@ -44,15 +55,26 @@ def switch_group(index):
 
     return __inner
 
+def move_to_group(index):
+    @lazy.function
+    def __inner(qtile):
+        group = qtile.groups[index]
+        qtile.currentWindow.togroup(group.name)
+
+    return __inner
+
 def window_to_prev_group():
     @lazy.function
     def __inner(qtile):
         if qtile.currentWindow is not None:
             index = qtile.groups.index(qtile.currentGroup)
             if index > 0:
-                qtile.currentWindow.togroup(qtile.groups[index - 1].name)
+                group = qtile.groups[index - 1]
             else:
-                qtile.currentWindow.togroup(qtile.groups[len(qtile.groups) - 2].name)
+                group = qtile.groups[len(qtile.groups) - 2]
+
+            qtile.currentWindow.togroup(group.name)
+            group.cmd_toscreen()
 
     return __inner
 
@@ -62,9 +84,12 @@ def window_to_next_group():
         if qtile.currentWindow is not None:
             index = qtile.groups.index(qtile.currentGroup)
             if index < len(qtile.groups) - 2:
-                qtile.currentWindow.togroup(qtile.groups[index + 1].name)
+                group = qtile.groups[index + 1]
             else:
-                qtile.currentWindow.togroup(qtile.groups[0].name)
+                group = qtile.groups[0]
+
+            qtile.currentWindow.togroup(group.name)
+            group.cmd_toscreen()
 
     return __inner
 
@@ -112,11 +137,36 @@ def switch_language():
 
     return __inner
 
+class CpuFreq(base.InLoopPollText):
+    def __init__(self, **config):
+        base.InLoopPollText.__init__(self, **config)
+        self.update_interval = 5
+
+    def poll(self):
+        output = subprocess.check_output("lscpu").decode()
+        info = {}
+        for line in output.splitlines():
+            key, val = line.split(':')
+            info[key] = val
+
+        freq = float(info["CPU MHz"].strip())
+
+        return '%dMHz' % freq
+
+class VpnStatus(base.InLoopPollText):
+    def __init__(self, **config):
+        base.InLoopPollText.__init__(self, **config)
+        self.update_interval = 1
+
+    def poll(self):
+        output = subprocess.check_output(BIN + "/vpn_status.sh").decode()
+        return "vpn: " + output.strip()
 
 class Commands(object):
     volume_up = 'amixer -q -c 0 sset Master 3dB+'
     volume_down = 'amixer -q -c 0 sset Master 3dB-'
     volume_toggle = 'amixer -q set Master toggle'
+    run = f"dmenu_run -i -p '>>>' -fn 'Open Sans-10' -nb '#000' -nf '#fff' -sb '{color_green}' -sf '#fff'"
 
 keys = [
     Key([mod, alt], "space", lazy.next_layout()),
@@ -128,7 +178,7 @@ keys = [
 
     Key([mod, "control"], "r", lazy.restart()),
     Key([mod, "control"], "q", lazy.shutdown()),
-    Key([mod], "r", lazy.spawncmd()),
+    Key([mod], "r", lazy.spawn(Commands.run)),
 
     Key([mod], "Right", lazy.screen.next_group(skip_managed=True)),
     Key([mod], "Left", lazy.screen.prev_group(skip_managed=True)),
@@ -173,8 +223,6 @@ groups = [
         ScratchPad("scratchpad", [
             DropDown("term", "urxvt -e zsh -c byobu", opacity=0.8, width=1.0, x=0.0, height=0.6)
         ]),
-        Group("1"),
-        Group("2"),
 ]
 
 group_www = "www"
@@ -186,7 +234,7 @@ groups.append(Group(group_www,
     matches=[Match(wm_class=["Google-chrome"])], 
     spawn="google-chrome-stable", 
     init=True, 
-    persist=False,
+    persist=True,
     position=0,
 ))
 
@@ -211,12 +259,15 @@ groups.append(Group(group_music,
     position=3,
 ))
 
+groups.append(Group("1"))
+groups.append(Group("2"))
+
 for index, key in enumerate(['F1', 'F2', 'F3', 'F4', 'F5']):
     keys.append(Key([mod], key, switch_group(index)))
+    keys.append(Key([mod, shift], key, move_to_group(index)))
 
 layouts = [
     layout.MonadTall(border_focus='#a54242'),
-    layout.Max(),
 ]
 
 widget_defaults = dict(
@@ -238,17 +289,21 @@ screens = [
                 widget.Spacer(length=16),
                 widget.WindowName(),
 
-                widget.KeyboardLayout(configured_keyboards=['us','lt']),
-                widget.Battery(font=bolder_font),
-                widget.Backlight(
-                    backlight_name = 'intel_backlight',
-                ),
                 widget.CPUGraph(),
                 widget.MemoryGraph(graph_color='85678f'),
                 widget.NetGraph(graph_color='de935f'),
-                widget.ThermalSensor(),
-                widget.Wlan(interface='wlp59s0', font=bolder_font),
-                widget.Volume(),
+               
+                VpnStatus(background=color_cyan),
+                CpuFreq(background=color_blue),
+                widget.KeyboardLayout(background=color_green,configured_keyboards=['us','lt']),
+                widget.Battery(background=color_yellow),
+                widget.Backlight(
+                    background=color_red,
+                    backlight_name = 'intel_backlight',
+                ),
+                widget.ThermalSensor(background=color_magenta),
+                widget.Wlan(interface='wlp59s0', background=color_cyan),
+                widget.Volume(background=color_blue),
                 widget.Systray(icon_size=40, padding=0),
                 widget.Clock(format='%Y-%m-%d %a %H:%M'),
                 widget.CurrentLayoutIcon(),
