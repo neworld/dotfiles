@@ -1,3 +1,4 @@
 #!/bin/sh
 
-XMODIFIERS=  android-studio
+XMODIFIERS= android-studio
+
