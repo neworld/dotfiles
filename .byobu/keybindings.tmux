@@ -22,3 +22,6 @@ unbind-key -n F12
 
 unbind-key -n M-F5
 bind-key -n M-F5 source $BYOBU_PREFIX/share/byobu/profiles/tmuxrc
+bind-key -n C-Up copy-mode
+bind-key -n C-Down copy-mode
+
