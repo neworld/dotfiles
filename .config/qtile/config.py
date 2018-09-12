@@ -190,7 +190,7 @@ keys = [
     Key([mod], "slash", lazy.window.toggle_fullscreen()),
     Key([mod, ctrl], "space", lazy.layout.swap_main()),
 
-    Key([alt], "Tab", lazy.layout.next()),
+    Key([mod], "Tab", lazy.layout.next()),
     Key([alt, shift], "Tab", lazy.layout.prev()),
     
     Key([mod], "l", lazy.spawn("dm-tool lock")),
@@ -206,7 +206,7 @@ keys = [
     Key([], 'XF86MonBrightnessUp', lazy.spawn("xbacklight -inc 10%")),
     Key([], 'XF86MonBrightnessDown', lazy.spawn("xbacklight -dec 10%")),
 
-    Key([mod], 'Tab', lazy.run_extension(extension.WindowList(
+    Key([alt], 'Tab', lazy.run_extension(extension.WindowList(
         all_groups = True,
         dmenu_ignorecase = True,
     ))),
@@ -217,6 +217,7 @@ keys = [
     Key([mod], '2', spawn_bin('screen_file.sh')),
     Key([mod, shift], '1', spawn_bin('screen_clip_full.sh')),
     Key([mod, shift], '2', spawn_bin('screen_file_full.sh')),
+    Key([mod], 's', spawn_bin('screen_layouts/setup.sh')),
 ]
 
 groups = [
