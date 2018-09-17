@@ -173,6 +173,7 @@ keys = [
 
     Key([mod], "Return", lazy.spawn("urxvt")),
     Key([mod], "f", lazy.spawn("thunar")),
+    Key([mod], 'c', lazy.spawn("code")),
 
     Key([mod], "q", lazy.window.kill()),
 
@@ -218,6 +219,7 @@ keys = [
     Key([mod, shift], '1', spawn_bin('screen_clip_full.sh')),
     Key([mod, shift], '2', spawn_bin('screen_file_full.sh')),
     Key([mod], 's', spawn_bin('screen_layouts/setup.sh')),
+    Key([mod], 'p', spawn_bin('dmenu-session.sh')),
 ]
 
 groups = [
@@ -240,7 +242,7 @@ groups.append(Group(group_www,
 ))
 
 groups.append(Group(group_android,
-    matches=[Match(wm_class=["jetbrains-studio"], title=["Android Emulator - "])], 
+    matches=[Match(wm_class=["jetbrains-studio"])], 
     persist=False,
     init=False,
     position=1,
@@ -254,7 +256,7 @@ groups.append(Group(group_chat,
 ))
 
 groups.append(Group(group_music,
-    matches=[Match(wm_class=["Spotify", "vlc"])], 
+    matches=[Match(wm_class=["Spotify"]), Match(wm_class=["vlc"])], 
     persist=False,
     init=False,
     position=3,
@@ -297,7 +299,11 @@ screens = [
                 VpnStatus(background=color_cyan),
                 CpuFreq(background=color_blue),
                 widget.KeyboardLayout(background=color_green,configured_keyboards=['us','lt']),
-                widget.Battery(background=color_yellow),
+                widget.Battery(
+                    background=color_yellow,
+                    charge_char = u'↑',
+                    discharge_char = u'↓'
+                ),
                 widget.Backlight(
                     background=color_red,
                     backlight_name = 'intel_backlight',

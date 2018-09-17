@@ -1,0 +1,4 @@
+# custom Android Studio VM options, see https://developer.android.com/studio/intro/studio-config.html
+
+-Dgradle.ide.gradle.run.configuration.fix.enabled=false
+-Xmx3g
