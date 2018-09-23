@@ -100,6 +100,7 @@ PAGER="more"
 
 source ~/.alias
 source ~/.env
+source ~/.secret
 
 math () {
     bc -l <<< "$@"
