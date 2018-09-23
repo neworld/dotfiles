@@ -25,3 +25,6 @@ bind-key -n M-F5 source $BYOBU_PREFIX/share/byobu/profiles/tmuxrc
 bind-key -n C-Up copy-mode
 bind-key -n C-Down copy-mode
 
+bind-key -n C-NPage copy-mode \; send-keys NPage
+bind-key -n C-PPage copy-mode \; send-keys PPage
+

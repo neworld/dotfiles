@@ -256,7 +256,7 @@ groups.append(Group(group_chat,
 ))
 
 groups.append(Group(group_music,
-    matches=[Match(wm_class=["Spotify"]), Match(wm_class=["vlc"])], 
+    matches=[Match(wm_class=["spotify"]), Match(wm_class=["vlc"])], 
     persist=False,
     init=False,
     position=3,
@@ -264,6 +264,8 @@ groups.append(Group(group_music,
 
 groups.append(Group("1"))
 groups.append(Group("2"))
+groups.append(Group("3"))
+groups.append(Group("4"))
 
 for index, key in enumerate(['F1', 'F2', 'F3', 'F4', 'F5']):
     keys.append(Key([mod], key, switch_group(index)))
