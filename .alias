@@ -7,4 +7,5 @@ alias open="xdg-open"
 
 alias cbr='git rev-parse --abbrev-ref HEAD'
 alias svg2vd_all='find . -exec svg2vd -i {} -o out/ --fix-fill-type \;'
+alias get-wm-class='xprop WM_CLASS | grep WM_CLASS'
 

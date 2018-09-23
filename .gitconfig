@@ -18,6 +18,7 @@
 	shorty = status --short --branch
 [core]
 	excludesfile = ~/.gitignore_global
+	editor = vim
 [branch]
 	autosetuprebase = always
 [branch "master"]

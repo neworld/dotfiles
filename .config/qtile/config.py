@@ -311,7 +311,7 @@ screens = [
                 widget.ThermalSensor(background=color_magenta),
                 widget.Wlan(interface='wlp59s0', background=color_cyan),
                 widget.Volume(background=color_blue),
-                widget.Systray(icon_size=40, padding=0),
+                widget.Systray(icon_size=40, padding=3),
                 widget.Clock(format='%Y-%m-%d %a %H:%M'),
                 widget.CurrentLayoutIcon(),
             ],
@@ -351,6 +351,10 @@ floating_layout = layout.Floating(float_rules=[
     {'wname': 'pinentry'},  # GPG key password entry
     {'wmclass': 'ssh-askpass'},  # ssh-askpasis
     {'wname': 'Android Virtual Device Manager'},
+    {'wmclass': 'feh'},
+    {'wmclass': 'solaar'},
+    {'wmclass': 'pavucontrol'},
+    {'wmclass': 'nm-connection-editor'},
 ])
 auto_fullscreen = True
 focus_on_window_activation = "smart"
