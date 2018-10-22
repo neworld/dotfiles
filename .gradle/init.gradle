@@ -1,0 +1,37 @@
+initscript {
+  repositories {
+    jcenter()
+    maven { url 'https://plugins.gradle.org/m2' }
+  }
+
+  dependencies {
+    classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
+    classpath 'com.gradle:build-scan-plugin:1.12.1'
+  }
+}
+
+rootProject {
+  apply plugin: com.gradle.scan.plugin.BuildScanPlugin
+
+  buildScan {
+    licenseAgreementUrl = 'https://gradle.com/terms-of-service'
+    licenseAgree = 'yes'
+  }
+}
+
+allprojects {
+  apply plugin: com.github.benmanes.gradle.versions.VersionsPlugin
+
+  dependencyUpdates.resolutionStrategy = {
+    componentSelection { rules ->
+      rules.all { ComponentSelection selection ->
+        boolean rejected = ['alpha', 'beta', 'rc', 'cr', 'm'].any { qualifier ->
+          selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/
+        }
+        if (rejected) {
+          selection.reject('Release candidate')
+        }
+      }
+    }
+  }
+}
