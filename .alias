@@ -1,5 +1,5 @@
-alias pbcopy="xclip"
-alias pbpaste="xclip -o"
+alias pbcopy="xclip -selection clipboard"
+alias pbpaste="xclip -o -selection clipboard"
 
 alias vpn-on="sudo systemctl start openvpn-client@vpn_vinted"
 alias vpn-off="sudo systemctl stop openvpn-client@vpn_vinted"

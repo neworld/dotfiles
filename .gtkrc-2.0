@@ -2,7 +2,7 @@
 # Any customization should be done in ~/.gtkrc-2.0.mine instead.
 
 include "/home/neworld/.gtkrc-2.0.mine"
-gtk-theme-name="Raleigh"
+gtk-theme-name="Adapta-Nokto-Eta"
 gtk-icon-theme-name="ePapirus"
 gtk-font-name="Cantarell 11"
 gtk-cursor-theme-name="Adwaita"

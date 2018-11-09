@@ -328,7 +328,9 @@ mouse = [
          start=lazy.window.get_position()),
     Drag([mod], "Button3", lazy.window.set_size_floating(),
          start=lazy.window.get_size()),
-    Click([mod], "Button2", lazy.window.bring_to_front())
+    Click([mod], "Button2", lazy.window.bring_to_front()),
+    Click([mod], "Button6", lazy.screen.next_group(skip_managed=True)),
+    Click([mod], "Button7", lazy.screen.prev_group(skip_managed=True)),
 ]
 
 dgroups_key_binder = None
@@ -357,6 +359,8 @@ floating_layout = layout.Floating(float_rules=[
     {'wmclass': 'solaar'},
     {'wmclass': 'pavucontrol'},
     {'wmclass': 'nm-connection-editor'},
+    {'wmclass': 'sun-awt-X11-XFramePeer'},
+    {'wmclass': 'jetbrains-studio'},
 ])
 auto_fullscreen = True
 focus_on_window_activation = "smart"
@@ -375,4 +379,3 @@ wmname = "LG3D"
 def autostart():
     path = os.path.expanduser('~/bin/startup.sh')
     subprocess.call([path])
-
