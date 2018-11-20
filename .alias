@@ -9,3 +9,6 @@ alias cbr='git rev-parse --abbrev-ref HEAD'
 alias svg2vd_all='find . -exec svg2vd -i {} -o out/ --fix-fill-type \;'
 alias get-wm-class='xprop WM_CLASS | grep WM_CLASS'
 
+alias delay_network='sudo tc qdisc add dev wlp59s0 root netem delay'
+alias undelay_network='sudo tc qdisc del dev wlp59s0 root'
+

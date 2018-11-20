@@ -2,7 +2,7 @@
 	name = neworld
 	email = aneworld@gmail.com
 
-[includeif "gitdir:~/projects/vinted"]
+[includeif "gitdir:~/projects/vinted/"]
 	path = ~/.gitconfig-vinted
 
 [color]
