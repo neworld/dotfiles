@@ -1,0 +1,4 @@
+#!/bin/sh
+
+hdpi /usr/bin/visualvm --laf GTK
+

@@ -11,4 +11,5 @@ solaar &
 imwheel -b 45 -k
 udiskie --tray &
 lxsession &
+synergy &
 

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+optirun ~/Android/Sdk/emulator/emulator  -avd Nexus_5X_API_$1
+
