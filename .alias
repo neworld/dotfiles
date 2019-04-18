@@ -12,3 +12,10 @@ alias get-wm-class='xprop WM_CLASS | grep WM_CLASS'
 alias delay_network='sudo tc qdisc add dev wlp59s0 root netem delay'
 alias undelay_network='sudo tc qdisc del dev wlp59s0 root'
 
+alias fcd='cd `find . -type d -not -path "*/.*" | fzf`'
+alias fkill='kill -9 `ps aux | fzf | awk "{print $2}"`'
+alias fcat='cat `fzf`'
+alias fbat='bat `fzf`'
+alias frm='rm -Rf'
+alias ccal='cal -m'
+

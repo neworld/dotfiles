@@ -106,3 +106,5 @@ math () {
     bc -l <<< "$@"
 }
 
+eval $(thefuck --alias)
+
