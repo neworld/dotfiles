@@ -162,6 +162,16 @@ class VpnStatus(base.InLoopPollText):
         output = subprocess.check_output(BIN + "/vpn_status.sh").decode()
         return "vpn: " + output.strip()
 
+class GpuStatus(base.InLoopPollText):
+    def __init__(self, **config):
+        base.InLoopPollText.__init__(self, **config)
+        self.update_interval = 1
+
+    def poll(self):
+        command = 'cat /sys/bus/pci/devices/0000:01:00.0/power/control' 
+        output = subprocess.check_output(command.split(' ')).decode()
+        return "gpu: " + output.strip()
+
 class Commands(object):
     volume_up = 'amixer -q -c 0 sset Master 3dB+'
     volume_down = 'amixer -q -c 0 sset Master 3dB-'
@@ -298,6 +308,7 @@ screens = [
                 widget.MemoryGraph(graph_color='85678f'),
                 widget.NetGraph(graph_color='de935f'),
                
+                GpuStatus(background=color_magenta),
                 VpnStatus(background=color_cyan),
                 CpuFreq(background=color_blue),
                 widget.KeyboardLayout(background=color_green,configured_keyboards=['us','lt']),
