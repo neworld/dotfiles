@@ -139,6 +139,16 @@ def window_to_next_screen():
 
     return __inner
 
+def switch_groups_between_screens():
+    @lazy.function
+    def __inner(qtile):
+        other_screen_index = (qtile.screens.index(qtile.currentScreen) + 1) % len(qtile.screens)
+        other_screen = qtile.screens[other_screen_index]
+
+        qtile.currentScreen.setGroup(other_screen.group)
+
+    return __inner
+
 def switch_language():
 
     kb_layout_regex = re.compile('layout:\s+(?P<layout>\w+)')
@@ -231,6 +241,11 @@ keys = [
 
     Key([mod], "backslash", lazy.next_screen()),
     Key([mod, shift], "backslash", window_to_next_screen()),
+    Key([mod, ctrl], "backslash", window_to_next_screen()),
+
+    Key([ctrl], "BackSpace", lazy.next_screen()),
+    Key([ctrl, shift], "BackSpace", window_to_next_screen()),
+    Key([alt], "BackSpace", switch_groups_between_screens()),
 
     Key([], 'XF86AudioRaiseVolume', lazy.spawn(Commands.volume_up)),
     Key([], 'XF86AudioLowerVolume', lazy.spawn(Commands.volume_down)),
