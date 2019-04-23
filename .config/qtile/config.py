@@ -434,7 +434,7 @@ focus_on_window_activation = "smart"
 # java that happens to be on java's whitelist.
 wmname = "LG3D"
 
-@hook.subscribe.startup
+@hook.subscribe.startup_once
 def autostart():
     path = os.path.expanduser('~/bin/startup.sh')
     subprocess.call([path])
