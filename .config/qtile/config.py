@@ -300,7 +300,9 @@ groups.append(Group("1"))
 groups.append(Group("2"))
 groups.append(Group("3"))
 groups.append(Group("4"))
-groups.append(Group("Screen"))
+groups.append(Group("5"))
+groups.append(Group("6"))
+groups.append(Group("7"))
 
 for index, key in enumerate(['F1', 'F2', 'F3', 'F4', 'F5']):
     keys.append(Key([mod], key, switch_group(index)))
