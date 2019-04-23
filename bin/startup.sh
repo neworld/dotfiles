@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [[ -z "${_STARTUP_IS_DONE}" ]]; then
+    exit 0
+fi
+
 parcellite &
 
 setxkbmap -option terminate:ctrl_alt_bksp
@@ -13,3 +17,5 @@ udiskie --tray &
 lxsession &
 synergy &
 
+
+export _STARTUP_IS_DONE="done"

@@ -55,6 +55,23 @@ def switch_group(index):
 
     return __inner
 
+def toggle_scrachpad_on_main(name):
+    last_screen = -1
+
+    @lazy.function
+    def __inner(qtile):
+        nonlocal last_screen
+        group = qtile.groupMap.get("scratchpad")
+        if name in group.dropdowns and group.dropdowns[name].visible:
+            group.dropdowns[name].hide()
+            qtile.toScreen(last_screen)
+        else:
+            last_screen = qtile.screens.index(qtile.currentScreen)
+            qtile.toScreen(0)
+            group.cmd_dropdown_toggle('term')
+
+    return __inner
+
 def move_to_group(index):
     @lazy.function
     def __inner(qtile):
@@ -100,8 +117,10 @@ def window_to_prev_screen():
             index = qtile.screens.index(qtile.currentScreen)
             if index > 0:
                 qtile.currentWindow.togroup(qtile.screens[index - 1].group.name)
+                qtile.toScreen(index - 1)
             else:
                 qtile.currentWindow.togroup(qtile.screens[len(qtile.screens) - 1].group.name)
+                qtile.toScreen(0)
 
     return __inner
 
@@ -113,8 +132,10 @@ def window_to_next_screen():
             index = qtile.screens.index(qtile.currentScreen)
             if index < len(qtile.screens) - 1:
                 qtile.currentWindow.togroup(qtile.screens[index + 1].group.name)
+                qtile.toScreen(index + 1)
             else:
                 qtile.currentWindow.togroup(qtile.screens[0].group.name)
+                qtile.toScreen(0)
 
     return __inner
 
@@ -206,7 +227,10 @@ keys = [
     
     Key([mod], "l", lazy.spawn("dm-tool lock")),
 
-    Key([mod], "grave", lazy.group['scratchpad'].dropdown_toggle('term')),
+    Key([mod], "grave", toggle_scrachpad_on_main("term")),
+
+    Key([mod], "backslash", lazy.next_screen()),
+    Key([mod, shift], "backslash", window_to_next_screen()),
 
     Key([], 'XF86AudioRaiseVolume', lazy.spawn(Commands.volume_up)),
     Key([], 'XF86AudioLowerVolume', lazy.spawn(Commands.volume_down)),
@@ -276,6 +300,7 @@ groups.append(Group("1"))
 groups.append(Group("2"))
 groups.append(Group("3"))
 groups.append(Group("4"))
+groups.append(Group("Screen"))
 
 for index, key in enumerate(['F1', 'F2', 'F3', 'F4', 'F5']):
     keys.append(Key([mod], key, switch_group(index)))
@@ -326,7 +351,13 @@ screens = [
                 widget.Volume(background=color_blue),
                 widget.Systray(icon_size=40, padding=3),
                 widget.Clock(format='%Y-%m-%d %a %H:%M'),
-                widget.CurrentLayoutIcon(),
+                widget.CurrentScreen(
+                    active_text='●',
+                    inactive_text='○',
+                    fontsize=40,
+                    active_color=color_green,
+                    inactive_color=color_red,
+                ),
             ],
             40,
         ),
@@ -390,3 +421,7 @@ wmname = "LG3D"
 def autostart():
     path = os.path.expanduser('~/bin/startup.sh')
     subprocess.call([path])
+
+@hook.subscribe.screen_change
+def restart_on_randr(qtile, ev):
+    qtile.cmd_restart()

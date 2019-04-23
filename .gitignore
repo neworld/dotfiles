@@ -52,3 +52,4 @@ CachedData
 .visualvm
 
 .dropbox
+__pycache__
