@@ -243,9 +243,9 @@ keys = [
     Key([mod, shift], "backslash", window_to_next_screen()),
     Key([mod, ctrl], "backslash", window_to_next_screen()),
 
-    Key([ctrl], "BackSpace", lazy.next_screen()),
-    Key([ctrl, shift], "BackSpace", window_to_next_screen()),
-    Key([alt], "BackSpace", switch_groups_between_screens()),
+    Key([ctrl], "backslash", lazy.next_screen()),
+    Key([ctrl, shift], "backslash", window_to_next_screen()),
+    Key([alt], "backslash", switch_groups_between_screens()),
 
     Key([], 'XF86AudioRaiseVolume', lazy.spawn(Commands.volume_up)),
     Key([], 'XF86AudioLowerVolume', lazy.spawn(Commands.volume_down)),
