@@ -1,0 +1,10 @@
+[Unit]
+Description=Run wiki backup every minute
+
+[Timer]
+OnCalendar=*:*:0
+Persistent=true
+RandomizedDelaySec=60s
+
+[Install]
+WantedBy=timers.target

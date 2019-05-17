@@ -1,0 +1,9 @@
+[Unit]
+Description=Backup personal WIKI
+
+[Service]
+Type=exec
+ExecStart=%h/projects/wiki/upload.sh
+
+[Install]
+WantedBy=default.target
