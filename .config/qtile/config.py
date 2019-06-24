@@ -24,6 +24,7 @@ from libqtile.widget import base
 import re
 import subprocess
 import os
+from pprint import pprint, pformat
 
 mod = "mod4"
 shift = "shift"
@@ -61,13 +62,13 @@ def toggle_scrachpad_on_main(name):
     @lazy.function
     def __inner(qtile):
         nonlocal last_screen
-        group = qtile.groupMap.get("scratchpad")
+        group = qtile.groups_map.get("scratchpad")
         if name in group.dropdowns and group.dropdowns[name].visible:
             group.dropdowns[name].hide()
-            qtile.toScreen(last_screen)
+            qtile.focus_screen(last_screen)
         else:
-            last_screen = qtile.screens.index(qtile.currentScreen)
-            qtile.toScreen(0)
+            last_screen = qtile.screens.index(qtile.current_screen)
+            qtile.focus_screen(0)
             group.cmd_dropdown_toggle('term')
 
     return __inner
@@ -76,21 +77,21 @@ def move_to_group(index):
     @lazy.function
     def __inner(qtile):
         group = qtile.groups[index]
-        qtile.currentWindow.togroup(group.name)
+        qtile.current_window.togroup(group.name)
 
     return __inner
 
 def window_to_prev_group():
     @lazy.function
     def __inner(qtile):
-        if qtile.currentWindow is not None:
-            index = qtile.groups.index(qtile.currentGroup)
+        if qtile.current_window is not None:
+            index = qtile.groups.index(qtile.current_group)
             if index > 0:
                 group = qtile.groups[index - 1]
             else:
                 group = qtile.groups[len(qtile.groups) - 2]
 
-            qtile.currentWindow.togroup(group.name)
+            qtile.current_window.togroup(group.name)
             group.cmd_toscreen()
 
     return __inner
@@ -98,14 +99,14 @@ def window_to_prev_group():
 def window_to_next_group():
     @lazy.function
     def __inner(qtile):
-        if qtile.currentWindow is not None:
-            index = qtile.groups.index(qtile.currentGroup)
+        if qtile.current_window is not None:
+            index = qtile.groups.index(qtile.current_group)
             if index < len(qtile.groups) - 2:
                 group = qtile.groups[index + 1]
             else:
                 group = qtile.groups[0]
 
-            qtile.currentWindow.togroup(group.name)
+            qtile.current_window.togroup(group.name)
             group.cmd_toscreen()
 
     return __inner
@@ -113,13 +114,13 @@ def window_to_next_group():
 def window_to_prev_screen():
     @lazy.function
     def __inner(qtile):
-        if qtile.currentWindow is not None:
-            index = qtile.screens.index(qtile.currentScreen)
+        if qtile.current_window is not None:
+            index = qtile.screens.index(qtile.current_screen)
             if index > 0:
-                qtile.currentWindow.togroup(qtile.screens[index - 1].group.name)
+                qtile.current_window.togroup(qtile.screens[index - 1].group.name)
                 qtile.toScreen(index - 1)
             else:
-                qtile.currentWindow.togroup(qtile.screens[len(qtile.screens) - 1].group.name)
+                qtile.current_window.togroup(qtile.screens[len(qtile.screens) - 1].group.name)
                 qtile.toScreen(0)
 
     return __inner
@@ -128,13 +129,13 @@ def window_to_prev_screen():
 def window_to_next_screen():
     @lazy.function
     def __inner(qtile):
-        if qtile.currentWindow is not None:
-            index = qtile.screens.index(qtile.currentScreen)
+        if qtile.current_window is not None:
+            index = qtile.screens.index(qtile.current_screen)
             if index < len(qtile.screens) - 1:
-                qtile.currentWindow.togroup(qtile.screens[index + 1].group.name)
+                qtile.current_window.togroup(qtile.screens[index + 1].group.name)
                 qtile.toScreen(index + 1)
             else:
-                qtile.currentWindow.togroup(qtile.screens[0].group.name)
+                qtile.current_window.togroup(qtile.screens[0].group.name)
                 qtile.toScreen(0)
 
     return __inner
@@ -142,10 +143,10 @@ def window_to_next_screen():
 def switch_groups_between_screens():
     @lazy.function
     def __inner(qtile):
-        other_screen_index = (qtile.screens.index(qtile.currentScreen) + 1) % len(qtile.screens)
+        other_screen_index = (qtile.screens.index(qtile.current_screen) + 1) % len(qtile.screens)
         other_screen = qtile.screens[other_screen_index]
 
-        qtile.currentScreen.setGroup(other_screen.group)
+        qtile.current_screen.set_group(other_screen.group)
 
     return __inner
 
@@ -288,8 +289,8 @@ groups.append(Group(group_www,
 
 groups.append(Group(group_android,
     matches=[Match(wm_class=["jetbrains-studio"])], 
-    persist=False,
-    init=False,
+    persist=True,
+    init=True,
     position=1,
 ))
 

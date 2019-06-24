@@ -108,3 +108,5 @@ math () {
 
 eval $(thefuck --alias)
 
+DISABLE_UPDATE_PROMPT=true
+
