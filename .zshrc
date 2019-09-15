@@ -66,7 +66,7 @@ ZSH_THEME="robbyrussell"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git adb docker archlinux systemd gradle git-extras github fzf
+  git adb docker archlinux systemd gradle git-extras github fzf history jump
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -113,4 +113,8 @@ math () {
 eval $(thefuck --alias)
 
 DISABLE_UPDATE_PROMPT=true
+
+PATH="$PATH:$(ruby -e 'puts Gem.user_dir')/bin"
+
+setopt HIST_IGNORE_ALL_DUPS
 
