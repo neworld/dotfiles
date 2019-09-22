@@ -40,6 +40,10 @@ color_cyan = '#2d8f6f'
 
 HOME = os.path.expanduser('~')
 BIN = HOME + "/bin"
+DPI = os.environ.get("DPI", 100)
+
+def dpToPx(dp):
+    return int(dp / 160 * DPI)
 
 def spawn_bin(program):
     @lazy.function
@@ -287,26 +291,26 @@ groups.append(Group(group_www,
     position=0,
 ))
 
-groups.append(Group(group_android,
-    matches=[Match(wm_class=["jetbrains-studio"])], 
-    persist=True,
-    init=True,
-    position=1,
-))
+# groups.append(Group(group_android,
+#     matches=[Match(wm_class=["jetbrains-studio"])], 
+#     persist=True,
+#     init=True,
+#     position=1,
+# ))
 
-groups.append(Group(group_chat,
-    matches=[Match(wm_class=["Slack"])], 
-    persist=False,
-    init=False,
-    position=2,
-))
+# groups.append(Group(group_chat,
+#     matches=[Match(wm_class=["Slack"])], 
+#     persist=False,
+#     init=False,
+#     position=2,
+# ))
 
-groups.append(Group(group_music,
-    matches=[Match(wm_class=["spotify"]), Match(wm_class=["vlc"])], 
-    persist=False,
-    init=False,
-    position=3,
-))
+# groups.append(Group(group_music,
+#     matches=[Match(wm_class=["spotify"]), Match(wm_class=["vlc"])], 
+#     persist=False,
+#     init=False,
+#     position=3,
+# ))
 
 groups.append(Group("1"))
 groups.append(Group("2"))
@@ -326,8 +330,8 @@ layouts = [
 
 widget_defaults = dict(
     font='DejaVu sans',
-    fontsize=24,
-    padding=3,
+    fontsize=dpToPx(45),
+    padding=dpToPx(6),
 )
 
 bolder_font = "DejaVu sans Bold"
@@ -340,7 +344,7 @@ screens = [
             [
                 widget.GroupBox(),
                 widget.Prompt(),
-                widget.Spacer(length=16),
+                widget.Spacer(length=dpToPx(30)),
                 widget.WindowName(),
 
                 widget.CPUGraph(),
@@ -363,12 +367,12 @@ screens = [
                 widget.ThermalSensor(background=color_magenta),
                 widget.Wlan(interface='wlp59s0', background=color_cyan),
                 widget.Volume(background=color_blue),
-                widget.Systray(icon_size=40, padding=3),
+                widget.Systray(icon_size=dpToPx(75), padding=dpToPx(6)),
                 widget.Clock(format='%Y-%m-%d %a %H:%M'),
                 widget.CurrentScreen(
                     active_text='●',
                     inactive_text='○',
-                    fontsize=40,
+                    fontsize=dpToPx(75),
                     active_color=color_green,
                     inactive_color=color_red,
                 ),

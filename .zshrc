@@ -106,6 +106,11 @@ source ~/.alias
 source ~/.env
 source ~/.secret
 
+if [[ -f ~/.env-local ]]
+then
+  source ~/.env-local
+fi
+
 math () {
     bc -l <<< "$@"
 }
