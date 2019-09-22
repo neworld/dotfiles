@@ -1,4 +1,5 @@
-Xft.dpi: 230
+#include ".Xresources-local"
+
 Xft.autohint: 0
 Xft.rgba: rgb
 

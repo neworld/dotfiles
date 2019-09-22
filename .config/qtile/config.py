@@ -40,7 +40,7 @@ color_cyan = '#2d8f6f'
 
 HOME = os.path.expanduser('~')
 BIN = HOME + "/bin"
-DPI = os.environ.get("DPI", 100)
+DPI = int(os.environ.get("DPI", 100))
 
 def dpToPx(dp):
     return int(dp / 160 * DPI)
@@ -330,8 +330,8 @@ layouts = [
 
 widget_defaults = dict(
     font='DejaVu sans',
-    fontsize=dpToPx(45),
-    padding=dpToPx(6),
+    padding=dpToPx(3),
+    fontsize=24,
 )
 
 bolder_font = "DejaVu sans Bold"
@@ -344,7 +344,7 @@ screens = [
             [
                 widget.GroupBox(),
                 widget.Prompt(),
-                widget.Spacer(length=dpToPx(30)),
+                widget.Spacer(length=dpToPx(10)),
                 widget.WindowName(),
 
                 widget.CPUGraph(),
@@ -367,17 +367,17 @@ screens = [
                 widget.ThermalSensor(background=color_magenta),
                 widget.Wlan(interface='wlp59s0', background=color_cyan),
                 widget.Volume(background=color_blue),
-                widget.Systray(icon_size=dpToPx(75), padding=dpToPx(6)),
+                widget.Systray(icon_size=40, padding=dpToPx(3)),
                 widget.Clock(format='%Y-%m-%d %a %H:%M'),
                 widget.CurrentScreen(
                     active_text='●',
                     inactive_text='○',
-                    fontsize=dpToPx(75),
+                    fontsize=40,
                     active_color=color_green,
                     inactive_color=color_red,
                 ),
             ],
-            40,
+            dpToPx(25),
         ),
     ),
 ]
