@@ -26,11 +26,13 @@ CachedData
 .bundle
 .AndroidStudio*/config/*
 !.AndroidStudio*/config/options
+!.AndroidStudio*/config/keymap
 .AndroidStudio*/config/options/*
 !.AndroidStudio*/config/options/keymap.xml
 
 .Idea*/config/*
 !.Idea*/config/options
+!.Idea*/config/keymap
 .Idea*/config/options/*
 !.Idea*/config/options/keymap.xml
 
