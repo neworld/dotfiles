@@ -123,3 +123,4 @@ PATH="$PATH:$(ruby -e 'puts Gem.user_dir')/bin"
 
 setopt HIST_IGNORE_ALL_DUPS
 
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
