@@ -217,7 +217,7 @@ class Commands(object):
 keys = [
     Key([mod, alt], "space", lazy.next_layout()),
 
-    Key([mod], "Return", lazy.spawn("urxvt")),
+    Key([mod], "Return", lazy.spawn("alacritty")),
     Key([mod], "f", lazy.spawn("thunar")),
     Key([mod], 'c', lazy.spawn("code")),
 
@@ -274,7 +274,7 @@ keys = [
 
 groups = [
         ScratchPad("scratchpad", [
-            DropDown("term", "urxvt -e zsh -c byobu", opacity=0.8, width=1.0, x=0.0, height=0.6)
+            DropDown("term", "alacritty -e zsh -c byobu", opacity=0.8, width=1.0, x=0.0, height=0.6)
         ]),
 ]
 
