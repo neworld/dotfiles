@@ -124,3 +124,6 @@ PATH="$PATH:$(ruby -e 'puts Gem.user_dir')/bin"
 setopt HIST_IGNORE_ALL_DUPS
 
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# added by travis gem
+[ -f /home/neworld/.travis/travis.sh ] && source /home/neworld/.travis/travis.sh
