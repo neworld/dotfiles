@@ -14,7 +14,7 @@ alias undelay_network='sudo tc qdisc del dev wlp59s0 root'
 alias myip='curl -s -S https://icanhazip.com'
 
 alias fcd='cd `find . -type d -not -path "*/.*" | fzf`'
-alias fkill='kill -9 `ps aux | fzf | awk "{print $2}"`'
+alias fkill='kill -9 `ps aux | fzf | awk "{print \\\$2}"`'
 alias fcat='cat `fzf`'
 alias fbat='bat `fzf`'
 alias frm='rm -Rf'

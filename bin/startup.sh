@@ -12,3 +12,5 @@ solaar &
 udiskie --tray &
 lxsession &
 synergy &
+optimus-manager-qt &
+

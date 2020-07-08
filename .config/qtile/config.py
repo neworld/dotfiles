@@ -254,8 +254,8 @@ keys = [
     Key([], 'XF86AudioNext', lazy.spawn("playerctl next")),
     Key([], 'XF86AudioPrev', lazy.spawn("playerctl previous")),
     Key([], 'XF86AudioPlay', lazy.spawn("playerctl play-pause")),
-    Key([], 'XF86MonBrightnessUp', lazy.spawn("xbacklight -inc 10%")),
-    Key([], 'XF86MonBrightnessDown', lazy.spawn("xbacklight -dec 10%")),
+    Key([], 'XF86MonBrightnessUp', lazy.spawn("light -A 10")),
+    Key([], 'XF86MonBrightnessDown', lazy.spawn("light -U 10")),
 
     Key([alt], 'Tab', lazy.run_extension(extension.WindowList(
         all_groups = True,
@@ -421,6 +421,7 @@ floating_layout = layout.Floating(float_rules=[
     {'wmclass': 'nm-connection-editor'},
     {'wmclass': 'sun-awt-X11-XFramePeer'},
     {'wmclass': 'jetbrains-studio'},
+    {'wmclass': 'jetbrains-idea-ce'},
 ])
 auto_fullscreen = True
 focus_on_window_activation = "smart"
