@@ -245,8 +245,8 @@ keys = [
     Key([mod], "grave", toggle_scrachpad_on_main("term")),
 
     Key([mod], "BackSpace", lazy.next_screen()),
-    Key([mod, shift], "BackSpace", switch_groups_between_screens()),
-    Key([mod, ctrl], "BackSpace", window_to_next_screen()),
+    Key([mod, ctrl], "BackSpace", switch_groups_between_screens()),
+    Key([mod, shift], "BackSpace", window_to_next_screen()),
 
     Key([], 'XF86AudioRaiseVolume', lazy.spawn(Commands.volume_up)),
     Key([], 'XF86AudioLowerVolume', lazy.spawn(Commands.volume_down)),
