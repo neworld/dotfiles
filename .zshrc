@@ -127,3 +127,6 @@ source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zs
 
 # added by travis gem
 [ -f /home/neworld/.travis/travis.sh ] && source /home/neworld/.travis/travis.sh
+
+eval "$(direnv hook zsh)"
+
