@@ -495,8 +495,7 @@ key_bindings:
   #- { key: Insert,   mods: Shift,         action: PasteSelection   }
   #- { key: Key0,     mods: Control,       action: ResetFontSize    }
   - { key: Equals,   mods: Alt|Control,       action: IncreaseFontSize }
-  - { key: Add,      mods: Alt|Control,       action: IncreaseFontSize }
-  - { key: Subtract, mods: Alt|Control,       action: DecreaseFontSize }
+  - { key: Plus,      mods: Alt|Control,       action: IncreaseFontSize }
   - { key: Minus,    mods: Alt|Control,       action: DecreaseFontSize }
   #- { key: Return,   mods: Alt,           action: ToggleFullscreen }
 
