@@ -131,3 +131,5 @@ source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zs
 eval "$(direnv hook zsh)"
 eval "$(rbenv init -)"
 
+PROMPT="%(?:%{$fg_bold[green]%}%m%# ➜ :%{$fg_bold[red]%}➜ )"
+PROMPT+=' %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)'
