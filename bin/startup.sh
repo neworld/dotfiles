@@ -13,4 +13,5 @@ udiskie --tray &
 lxsession &
 synergy &
 optimus-manager-qt &
+screendimmer &
 

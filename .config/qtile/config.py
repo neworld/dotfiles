@@ -282,6 +282,7 @@ group_www = "www"
 group_android = "android"
 group_chat = "chat"
 group_music = "music"
+group_game = "game"
 
 groups.append(Group(group_www,
     matches=[Match(wm_class=["Google-chrome"])], 
@@ -320,12 +321,17 @@ groups.append(Group("5"))
 groups.append(Group("6"))
 groups.append(Group("7"))
 
+groups.append(Group(group_game,
+    layout = "floating"
+))
+
 for index, key in enumerate(['F1', 'F2', 'F3', 'F4', 'F5']):
     keys.append(Key([mod], key, switch_group(index)))
     keys.append(Key([mod, shift], key, move_to_group(index)))
 
 layouts = [
     layout.MonadTall(border_focus='#a54242'),
+    layout.Floating()
 ]
 
 widget_defaults = dict(
