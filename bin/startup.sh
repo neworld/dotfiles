@@ -7,11 +7,12 @@ xset r rate 200 30
 
 nm-applet &
 #pasystray &
-solaar &
+solaar -w hide &
 #imwheel -b 45 -k
 udiskie --tray &
 lxsession &
 synergy &
 optimus-manager-qt &
 screendimmer &
+/usr/bin/numlockx on 
 
