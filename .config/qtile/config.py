@@ -363,8 +363,14 @@ screens = [
                 widget.KeyboardLayout(background=color_green,configured_keyboards=['us','lt']),
                 widget.Battery(
                     background=color_yellow,
+                    low_background=color_red,
+                    low_foreground='#FFFFFF',
+                    low_percentage=0.20,
                     charge_char = u'↑',
-                    discharge_char = u'↓'
+                    discharge_char = u'↓',
+                    notify_below = 0.15,
+                    notification_timeout = 0,
+                    update_interval = 5,
                 ),
                 widget.Backlight(
                     background=color_red,
