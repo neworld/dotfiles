@@ -17,10 +17,10 @@
 # SOFTWARE.
 
 from libqtile.config import Key, Screen, Group, Drag, Click, DropDown, ScratchPad, Match
-from libqtile.command import lazy
 from libqtile import layout, bar, widget, extension, hook
 from libqtile.log_utils import logger
 from libqtile.widget import base
+from libqtile.lazy import lazy
 import re
 import subprocess
 import os
@@ -181,9 +181,9 @@ class CpuFreq(base.InLoopPollText):
     def poll(self):
         output = subprocess.check_output("lscpu").decode()
         info = {}
-        for line in output.splitlines():
-            key, val = line.split(':')
-            info[key] = val
+        # for line in output.splitlines():
+        #    key, val = line.split(':')
+        #    info[key] = val
 
         freq = float(info["CPU MHz"].strip())
 
