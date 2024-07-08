@@ -11,7 +11,7 @@ solaar -w hide &
 #imwheel -b 45 -k
 udiskie --tray &
 lxsession &
-synergy &
+/opt/Synergy/synergy &
 optimus-manager-qt &
 screendimmer &
 /usr/bin/numlockx on 
