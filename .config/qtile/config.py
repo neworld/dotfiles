@@ -184,14 +184,14 @@ def default_backlight():
                 return entry
         
         logger.info("No directories found in /sys/class/backlight/")
-        return None
+        return ""
     
     except FileNotFoundError:
         logger.error("The specified directory does not exist")
-        return None
+        return ""
     except PermissionError:
         logger.error("Permission denied to access the directory")
-        return None
+        return ""
 
 class CpuFreq(base.InLoopPollText):
     def __init__(self, **config):
