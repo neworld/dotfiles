@@ -173,6 +173,26 @@ def switch_language():
 
     return __inner
 
+def default_backlight():
+    directory_path = "/sys/class/backlight/"
+    try:
+        entries = os.listdir(directory_path)
+        
+        for entry in entries:
+            full_path = os.path.join(directory_path, entry)
+            if os.path.isdir(full_path):
+                return entry
+        
+        logger.info("No directories found in /sys/class/backlight/")
+        return None
+    
+    except FileNotFoundError:
+        logger.error("The specified directory does not exist")
+        return None
+    except PermissionError:
+        logger.error("Permission denied to access the directory")
+        return None
+
 class CpuFreq(base.InLoopPollText):
     def __init__(self, **config):
         base.InLoopPollText.__init__(self, **config)
@@ -374,7 +394,8 @@ screens = [
                 ),
                 widget.Backlight(
                     background=color_red,
-                    backlight_name = 'intel_backlight',
+                    backlight_name = default_backlight(),
+                    change_command = 'light -S {0}'
                 ),
                 widget.ThermalSensor(background=color_magenta),
                 widget.Wlan(interface='wlp59s0', background=color_cyan),
