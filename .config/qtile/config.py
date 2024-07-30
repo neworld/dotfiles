@@ -398,7 +398,7 @@ screens = [
                     change_command = 'light -S {0}'
                 ),
                 widget.ThermalSensor(background=color_magenta),
-                widget.Wlan(interface='wlp59s0', background=color_cyan),
+                widget.Wlan(background=color_cyan),
                 widget.Volume(background=color_blue),
                 widget.Systray(icon_size=dpToPx(30), padding=dpToPx(3)),
                 widget.Clock(format='%Y-%m-%d %a %H:%M'),
