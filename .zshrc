@@ -105,6 +105,7 @@ PAGER="more"
 source ~/.alias
 source ~/.env
 source ~/.secret
+source ~/.profile
 
 if [[ -f ~/.env-local ]]
 then
