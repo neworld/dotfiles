@@ -66,7 +66,7 @@ ZSH_THEME="robbyrussell"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git adb docker archlinux systemd gradle git-extras github fzf history jump colored-man-pages
+  git adb docker archlinux systemd gradle git-extras github fzf history jump colored-man-pages mise
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -134,3 +134,4 @@ eval "$(rbenv init -)"
 
 PROMPT="%(?:%{$fg_bold[green]%}%m%# ➜ :%{$fg_bold[red]%}➜ )"
 PROMPT+=' %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)'
+eval "$(mise activate zsh)"
