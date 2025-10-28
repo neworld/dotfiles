@@ -17,5 +17,5 @@ lxsession &
 /usr/bin/numlockx on 
 vdu_controls --system-tray --no-splash &
 /usr/bin/dunst &
-
+nitrogen --restore &
 
