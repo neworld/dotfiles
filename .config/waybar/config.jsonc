@@ -7,12 +7,13 @@
   "modules-left": ["custom/omarchy", "hyprland/workspaces"],
   "modules-center": ["clock", "custom/update", "custom/screenrecording-indicator"],
   "modules-right": [
-    "group/tray-expander",
+    "tray",
     "bluetooth",
     "network",
     "pulseaudio",
-    "cpu",
-    "battery"
+    "battery",
+    "memory",
+    "cpu"
   ],
   "hyprland/workspaces": {
     "on-click": "activate",
@@ -53,10 +54,13 @@
     "signal": 7,
     "interval": 21600
   },
-
+  "memory": {
+    "interval": 1,
+    "format": "  {}% "
+  },
   "cpu": {
-    "interval": 5,
-    "format": "󰍛",
+    "interval": 1,
+    "format": " {usage}% 󰍛",
     "on-click": "omarchy-launch-or-focus-tui btop",
     "on-click-right": "alacritty"
   },

@@ -637,6 +637,11 @@ chars = """
 """
 key = "NumpadEnter"
 
+[[keyboard.bindings]]
+key = "Insert"
+mods = "Control"
+action = "Copy"
+
 [mouse]
 hide_when_typing = false
 

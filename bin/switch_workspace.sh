@@ -21,12 +21,12 @@ if [[ "$direction" == "right" ]]; then
         fi
         target=$((target + 1))
     done
-    hyprctl dispatch workspace "$target"
+    hyprctl dispatch focusworkspaceoncurrentmonitor "$target"
 elif [[ "$direction" == "left" ]]; then
     target=$((current - 1))
     while [[ $target -ge 1 ]]; do
         if ! jq -e --argjson t "$target" 'index($t) != null' <<< "$occupied" > /dev/null; then
-            hyprctl dispatch workspace "$target"
+            hyprctl dispatch focusworkspaceoncurrentmonitor "$target"
             exit 0
         fi
         target=$((target - 1))
