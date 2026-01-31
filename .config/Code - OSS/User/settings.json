@@ -1,4 +1,4 @@
 {
-  "editor.fontFamily": "Symbols Nerd Font Mono, Noto Sans Mono, Noto Sans CJK TC, Noto Color Emoji, monospace",
-  "terminal.integrated.fontFamily": "Symbols Nerd Font Mono, Noto Sans Mono, Noto Sans CJK TC, Noto Color Emoji, monospace"
+  "editor.fontFamily": "'JetBrainsMono Nerd Font', 'JetBrains Mono', 'Fira Code', 'Noto Color Emoji', monospace",
+  "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font', 'JetBrains Mono', 'MesloLGS NF', 'Noto Color Emoji', monospace"
 }

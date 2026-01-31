@@ -72,14 +72,24 @@ enabled = true
 mods = "None"
 
 [[keyboard.bindings]]
+chars = "\u0011"
+key = "Q"
+mods = "Control"
+
+[[keyboard.bindings]]
+chars = "\u0003"
+key = "C"
+mods = "Super"
+
+[[keyboard.bindings]]
 action = "Paste"
 key = "V"
-mods = "Control|Shift"
+mods = "Control"
 
 [[keyboard.bindings]]
 action = "Copy"
 key = "C"
-mods = "Control|Shift"
+mods = "Control"
 
 [[keyboard.bindings]]
 action = "Paste"
