@@ -42,7 +42,7 @@ print_events = false
 render_timer = false
 
 [font]
-size = 13
+size = 11
 
 [font.glyph_offset]
 x = 0
@@ -72,8 +72,8 @@ enabled = true
 mods = "None"
 
 [[keyboard.bindings]]
-chars = "\u0011"
-key = "Q"
+chars = "\u0003"
+key = "E"
 mods = "Control"
 
 [[keyboard.bindings]]
