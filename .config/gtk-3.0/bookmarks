@@ -5,3 +5,5 @@ file:///home/neworld/tmp
 file:///home/neworld/projects
 file:///home/neworld/Dropbox
 sftp://neworld@192.168.8.14/
+smb://nas.lan/media/ media on nas.lan
+sftp://root@192.168.8.102/ 192.168.8.102 (sftp)
