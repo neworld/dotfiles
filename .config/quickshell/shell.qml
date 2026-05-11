@@ -71,6 +71,23 @@ Scope {
             fontFamily: root.fontFamily
             iconFontFamily: root.iconFontFamily
           }
+
+          Item {
+            Layout.preferredWidth: 40
+            Layout.fillHeight: true
+          }
+
+          MediaWidget {
+            id: mediaWidget
+            foreground: root.foreground
+            background: root.background
+            fontFamily: root.fontFamily
+            iconFontFamily: root.iconFontFamily
+            maxWidgetWidth: Math.max(260, centerModules.x - (leftModules.x + mediaWidget.x) - 40)
+            onCommandRequested: function(command) {
+              root.launch(command);
+            }
+          }
         }
 
         RowLayout {
@@ -82,6 +99,7 @@ Scope {
           z: 1
 
           ClockWidget {
+            id: clockWidget
             foreground: root.foreground
             fontFamily: root.fontFamily
             onRightClicked: root.launch("omarchy-launch-floating-terminal-with-presentation omarchy-tz-select")
