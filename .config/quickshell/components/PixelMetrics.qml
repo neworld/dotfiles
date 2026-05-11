@@ -9,6 +9,7 @@ Item {
   property color lowForeground: foreground
   property color mediumForeground: "#d7af5f"
   property color highForeground: "#d75f5f"
+  property color metricIconForeground: "#cdd6f4"
   property string fontFamily: "JetBrainsMono Nerd Font"
   property string tooltipText: ""
   property string currentClass: "low"
@@ -43,6 +44,37 @@ Item {
     const text = String(value || "");
     if (text.length >= 3) return text.slice(0, 3);
     return ("   " + text).slice(-3);
+  }
+
+  function cpuStatusText() {
+    const util = metric("cpu_util").value || "";
+    const load = metric("cpu_load").value || "";
+    const power = metric("cpu_power_state").value || "";
+    const parts = [];
+
+    if (util.length > 0) parts.push(util);
+    if (load.length > 0) parts.push("L" + load);
+    if (power.length > 0) parts.push(power);
+
+    return parts.join(" ");
+  }
+
+  function cpuStatusTooltip() {
+    const lines = [];
+    const util = metric("cpu_util").tooltip || "";
+    const load = metric("cpu_load").tooltip || "";
+    const power = metric("cpu_power_state").tooltip || "";
+
+    if (util.length > 0) lines.push(util);
+    if (load.length > 0) lines.push(load);
+    if (power.length > 0) lines.push(power);
+
+    return lines.join("\n");
+  }
+
+  function metricTooltip(key, metric) {
+    if (key === "cpu_util") return cpuStatusTooltip();
+    return String(metric.tooltip || metric.value || "");
   }
 
   Layout.preferredWidth: metricsRow.implicitWidth + 15
@@ -108,9 +140,9 @@ Item {
 
       Text {
         text: "󰍛"
-        color: root.foreground
+        color: root.metricIconForeground
         font.family: root.fontFamily
-        font.pixelSize: 12
+        font.pixelSize: 16
         verticalAlignment: Text.AlignVCenter
         Layout.alignment: Qt.AlignVCenter
       }
@@ -122,11 +154,13 @@ Item {
           required property string modelData
 
           property var metric: root.metric(modelData)
+          property string popupText: root.metricTooltip(modelData, metric)
 
           spacing: 4
           Layout.preferredHeight: 14
           Layout.alignment: Qt.AlignVCenter
           visible: metric.values.length > 0
+          transform: Translate { y: -3 }
 
           Item {
             Layout.preferredWidth: 28
@@ -155,9 +189,9 @@ Item {
               hoverEnabled: true
               acceptedButtons: Qt.NoButton
               BarTooltip {
-                visible: cpuGraphMouse.containsMouse && String(metric.tooltip || metric.value || "").length > 0
+                visible: cpuGraphMouse.containsMouse && popupText.length > 0
                 anchorItem: cpuGraphMouse
-                text: String(metric.tooltip || metric.value || "")
+                text: popupText
                 foreground: root.metricColor(metric.key)
                 background: "#1a1b26"
                 fontFamily: root.fontFamily
@@ -185,9 +219,9 @@ Item {
               hoverEnabled: true
               acceptedButtons: Qt.NoButton
               BarTooltip {
-                visible: cpuLabelMouse.containsMouse && String(metric.tooltip || metric.value || "").length > 0
+                visible: cpuLabelMouse.containsMouse && popupText.length > 0
                 anchorItem: cpuLabelMouse
-                text: String(metric.tooltip || metric.value || "")
+                text: popupText
                 foreground: root.metricColor(metric.key)
                 background: "#1a1b26"
                 fontFamily: root.fontFamily
@@ -205,9 +239,9 @@ Item {
 
       Text {
         text: "󰢮"
-        color: root.foreground
+        color: root.metricIconForeground
         font.family: root.fontFamily
-        font.pixelSize: 12
+        font.pixelSize: 16
         verticalAlignment: Text.AlignVCenter
         Layout.alignment: Qt.AlignVCenter
       }
@@ -224,6 +258,7 @@ Item {
           Layout.preferredHeight: 14
           Layout.alignment: Qt.AlignVCenter
           visible: metric.values.length > 0
+          transform: Translate { y: -3 }
 
           Item {
             Layout.preferredWidth: 28

@@ -27,6 +27,10 @@ BarText {
   active: currentClass === "active"
   visible: !hideWhenEmpty || lastText.length > 0
 
+  function refresh() {
+    if (!root.stream && root.command.length > 0) process.exec(["sh", "-c", root.command]);
+  }
+
   function applyLine(line) {
     const trimmed = line.trim();
     if (trimmed.length === 0) {
@@ -79,7 +83,7 @@ BarText {
     running: !root.stream && root.command.length > 0
     repeat: true
     triggeredOnStart: true
-    onTriggered: process.exec(["sh", "-c", root.command])
+    onTriggered: root.refresh()
   }
 
   Timer {

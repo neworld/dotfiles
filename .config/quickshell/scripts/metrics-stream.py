@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -31,9 +32,10 @@ def ram_usage(memory):
 
 
 def fmt_rate(bytes_per_sec):
-    if bytes_per_sec >= 1024 * 1024:
-        return f"{bytes_per_sec / (1024 * 1024):.1f}MB/s"
-    return f"{bytes_per_sec / 1024:.0f}KB/s"
+    mbps = (bytes_per_sec * 8) / 1_000_000
+    if mbps >= 10:
+        return f"{mbps:.0f} Mbps"
+    return f"{mbps:.1f} Mbps"
 
 
 def fmt_bytes(byte_count):
@@ -56,6 +58,10 @@ def fmt_mib_as_gib(mib_value):
 
 def fmt_percent(value):
     return f"{clamp(value):.0f}%"
+
+
+def fmt_load(value):
+    return f"{value:.2f}"
 
 
 def fmt_mbps(bytes_per_sec):
@@ -118,7 +124,29 @@ def read_temperature():
         return None
 
     temps = []
-    for line in result.stdout.splitlines():
+    details = []
+    cpu_temps = []
+    cpu_details = []
+    chip = ""
+    lines = result.stdout.splitlines()
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped:
+            chip = ""
+            continue
+
+        if (
+            not line.startswith(" ")
+            and not line.startswith("\t")
+            and index + 1 < len(lines)
+            and lines[index + 1].strip().startswith("Adapter:")
+        ):
+            chip = stripped
+            continue
+
+        if stripped.startswith("Adapter:"):
+            continue
+
         reading = line.split("(", 1)[0]
         match = re.search(r"([+-]?[0-9]+(?:\.[0-9]+)?)\s*°C", reading)
         if not match:
@@ -131,8 +159,46 @@ def read_temperature():
 
         if -50.0 <= temp <= 150.0:
             temps.append(temp)
+            label = reading.split(":", 1)[0].strip()
+            if label:
+                details.append((chip, label, temp))
+                chip_lower = chip.lower()
+                label_lower = label.lower()
+                is_cpu = (
+                    "k10temp" in chip_lower
+                    or "amd tsi" in label_lower
+                    or label_lower in {"tctl", "tdie"}
+                    or label_lower.startswith("tccd")
+                    or label_lower.startswith("package id")
+                    or label_lower.startswith("core ")
+                )
+                if is_cpu:
+                    cpu_temps.append(temp)
+                    cpu_details.append((chip, label, temp))
 
-    return max(temps) if temps else None
+    if not temps:
+        return None
+
+    return {
+        "value": max(cpu_temps if cpu_temps else temps),
+        "details": cpu_details if cpu_details else details,
+    }
+
+
+def temperature_tooltip(reading):
+    if reading is None:
+        return "Temperature: n/a"
+
+    details = reading.get("details", [])
+    if not details:
+        return f"Temperature: {reading['value']:.1f}°C"
+
+    lines = []
+    for chip, label, temp in details:
+        prefix = f"{chip} " if chip else ""
+        lines.append(f"{prefix}{label}: {temp:.1f}°C")
+
+    return "\n".join(lines)
 
 
 def read_gpu():
@@ -143,7 +209,7 @@ def read_gpu():
         result = subprocess.run(
             [
                 "nvidia-smi",
-                "--query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu",
+                "--query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw",
                 "--format=csv,noheader,nounits",
             ],
             check=False,
@@ -157,27 +223,84 @@ def read_gpu():
     if result.returncode != 0:
         return None
 
+    process_count = 0
+    try:
+        process_result = subprocess.run(
+            [
+                "nvidia-smi",
+                "--query-compute-apps=pid",
+                "--format=csv,noheader,nounits",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=1.5,
+        )
+        if process_result.returncode == 0:
+            process_count = len(
+                [
+                    line
+                    for line in process_result.stdout.splitlines()
+                    if line.strip() and line.strip().lower() != "no running processes found"
+                ]
+            )
+    except Exception:
+        process_count = 0
+
     first_line = result.stdout.strip().splitlines()[0:1]
     if not first_line:
         return None
 
     parts = [part.strip() for part in first_line[0].split(",")]
-    if len(parts) < 4:
+    if len(parts) < 5:
         return None
 
     try:
         memory_used = float(parts[1])
         memory_total = float(parts[2])
         memory = (memory_used / memory_total) * 100.0 if memory_total > 0 else 0.0
+        try:
+            power = float(parts[4])
+        except ValueError:
+            power = None
+
         return {
             "util": float(parts[0]),
             "memory": memory,
             "memory_used": memory_used,
             "memory_total": memory_total,
             "temp": float(parts[3]),
+            "power": power,
+            "process_count": process_count,
         }
     except ValueError:
         return None
+
+
+def read_power_state():
+    if shutil.which("powerprofilesctl"):
+        try:
+            result = subprocess.run(
+                ["powerprofilesctl", "get"],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=1.0,
+            )
+            if result.returncode == 0:
+                profile = result.stdout.strip()
+                if profile:
+                    return profile
+        except Exception:
+            pass
+
+    governor_path = Path("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor")
+    try:
+        governor = governor_path.read_text().strip()
+    except OSError:
+        return "n/a"
+
+    return governor
 
 
 def status_class(cpu, ram, temp):
@@ -212,7 +335,7 @@ def main():
     last_energy = read_energy_uj(rapl_energy_file)
     last_energy_time = last_time
     cpu_power = None
-    temp = None
+    temperature = None
     gpu = None
     probe_at = 0.0
 
@@ -222,6 +345,8 @@ def main():
         net = psutil.net_io_counters()
 
         cpu = psutil.cpu_percent(interval=None)
+        load1, load5, load15 = os.getloadavg()
+        power_state = read_power_state()
         memory = psutil.virtual_memory()
         ram_used, ram = ram_usage(memory)
         disk = psutil.disk_usage("/").percent
@@ -245,9 +370,11 @@ def main():
             last_energy_time = now
 
         if now >= probe_at:
-            temp = read_temperature()
+            temperature = read_temperature()
             gpu = read_gpu()
             probe_at = now + 5.0
+
+        temp = temperature["value"] if temperature is not None else None
 
         histories["cpu_util"].append(cpu)
         histories["cpu_mem"].append(ram)
@@ -266,12 +393,29 @@ def main():
                 "tooltip": "\n".join(
                     [
                         f"CPU usage: {cpu:.1f}%",
-                        f"Cores: {psutil.cpu_count(logical=False) or 'n/a'} physical, {psutil.cpu_count(logical=True) or 'n/a'} threads",
                         f"Power: {cpu_power:.1f} W" if cpu_power is not None else "Power: n/a",
                     ]
                 ),
                 "scale": 100,
                 "values": rounded(histories["cpu_util"]),
+            },
+            {
+                "key": "cpu_load",
+                "value": fmt_load(load1),
+                "tooltip": "\n".join(
+                    [
+                        f"Load average: {load1:.2f}, {load5:.2f}, {load15:.2f}",
+                    ]
+                ),
+                "scale": 100,
+                "values": [],
+            },
+            {
+                "key": "cpu_power_state",
+                "value": power_state,
+                "tooltip": f"Power state: {power_state}",
+                "scale": 100,
+                "values": [],
             },
             {
                 "key": "cpu_mem",
@@ -296,7 +440,7 @@ def main():
                     "tooltip": "\n".join(
                         [
                             f"CPU temperature: {temp:.1f}°C",
-                            f"Graph scale: {TEMP_MIN:.0f}-{TEMP_MAX:.0f}°C",
+                            temperature_tooltip(temperature),
                         ]
                     ),
                     "scale": 100,
@@ -310,7 +454,13 @@ def main():
                     {
                         "key": "gpu_util",
                         "value": fmt_percent(gpu["util"]),
-                        "tooltip": f"GPU usage: {gpu['util']:.1f}%",
+                        "tooltip": "\n".join(
+                            [
+                                f"GPU usage: {gpu['util']:.1f}%",
+                                f"Power: {gpu['power']:.1f} W" if gpu["power"] is not None else "Power: n/a",
+                                f"Processes: {gpu['process_count']}",
+                            ]
+                        ),
                         "scale": 100,
                         "values": rounded(histories["gpu_util"]),
                     },
@@ -329,12 +479,7 @@ def main():
                     {
                         "key": "gpu_temp",
                         "value": fmt_temp(gpu["temp"]),
-                        "tooltip": "\n".join(
-                            [
-                                f"GPU temperature: {gpu['temp']:.1f}°C",
-                                f"Graph scale: {TEMP_MIN:.0f}-{TEMP_MAX:.0f}°C",
-                            ]
-                        ),
+                        "tooltip": f"GPU temperature: {gpu['temp']:.1f}°C",
                         "scale": 100,
                         "values": rounded(histories["gpu_temp"]),
                     },
@@ -373,9 +518,7 @@ def main():
                 f"({gpu['memory_used'] / 1024:.1f}/{gpu['memory_total'] / 1024:.1f} GiB), "
                 f"{gpu['temp']:.0f}°C"
             )
-        tooltip_lines.append(
-            f"Temperature: {temp:.1f}°C" if temp is not None else "Temperature: n/a"
-        )
+        tooltip_lines.append(temperature_tooltip(temperature))
 
         payload = {
             "class": status_class(cpu, ram, temp),

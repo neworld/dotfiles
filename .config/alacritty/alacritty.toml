@@ -77,11 +77,6 @@ key = "E"
 mods = "Control"
 
 [[keyboard.bindings]]
-chars = "\u0003"
-key = "C"
-mods = "Super"
-
-[[keyboard.bindings]]
 action = "Paste"
 key = "V"
 mods = "Control"

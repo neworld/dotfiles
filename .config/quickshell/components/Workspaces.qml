@@ -1,4 +1,5 @@
 import Quickshell.Hyprland
+import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 
@@ -10,7 +11,9 @@ RowLayout {
   property color inactiveForeground: Qt.rgba(foreground.r, foreground.g, foreground.b, 0.5)
   property color remoteBorder: "#5c6370"
   property string fontFamily: "Noto Sans Mono"
+  property string iconFontFamily: "JetBrainsMono Nerd Font"
   property var screen: null
+  property var windowIcons: ({})
 
   spacing: 3
 
@@ -22,6 +25,91 @@ RowLayout {
       if (workspace.id === id) return workspace;
     }
     return null;
+  }
+
+  function classIconData(windowClass) {
+    const normalized = String(windowClass || "").toLowerCase();
+    const icons = {
+      "alacritty": { icon: "" },
+      "chromium": { icon: "" },
+      "code": { icon: "󰨞" },
+      "code-oss": { icon: "󰨞" },
+      "discord": { icon: "" },
+      "firefox": { icon: "" },
+      "freecad": { icon: "󰆧" },
+      "google-chrome": { icon: "" },
+      "kitty": { icon: "" },
+      "org.gnome.nautilus": { icon: "" },
+      "prusa-slicer": { icon: "󰹛" },
+      "slack": { icon: "󰒱" },
+      "spotify": { icon: "" },
+      "steam": { icon: "" },
+      "telegramdesktop": { icon: "" },
+      "thunderbird": { icon: "" },
+      "vesktop": { icon: "" }
+    };
+
+    if (icons[normalized] !== undefined) return icons[normalized];
+    if (normalized.indexOf("chrome") !== -1) return { icon: "" };
+    if (normalized.indexOf("firefox") !== -1) return { icon: "" };
+    if (normalized.indexOf("terminal") !== -1) return { icon: "" };
+    if (normalized.indexOf("jetbrains") !== -1) return { icon: "" };
+    return { icon: "" };
+  }
+
+  function workspaceIcon(id) {
+    return windowIcons[id] || "";
+  }
+
+  function updateWindowIcons(text) {
+    let clients = [];
+
+    try {
+      clients = JSON.parse(text);
+    } catch (error) {
+      return;
+    }
+
+    const choices = {};
+
+    for (let i = 0; i < clients.length; i++) {
+      const client = clients[i];
+      const workspace = client.workspace || {};
+      const id = workspace.id;
+
+      if (id < 1 || id > 10 || client.hidden || client.pinned) continue;
+
+      const existing = choices[id];
+      const currentFocus = client.focusHistoryID === undefined ? 999999 : client.focusHistoryID;
+      const existingFocus = existing === undefined || existing.focusHistoryID === undefined ? 999999 : existing.focusHistoryID;
+
+      if (existing === undefined || currentFocus < existingFocus) {
+        choices[id] = client;
+      }
+    }
+
+    const icons = {};
+    for (const id in choices) {
+      const iconData = classIconData(choices[id].class || choices[id].initialClass);
+      icons[id] = iconData.icon;
+    }
+
+    windowIcons = icons;
+  }
+
+  Process {
+    id: clientProcess
+    stdout: StdioCollector {
+      onStreamFinished: root.updateWindowIcons(this.text)
+    }
+  }
+
+  Timer {
+    interval: 1000
+    running: true
+    repeat: true
+    triggeredOnStart: true
+    onTriggered: clientProcess.exec(["hyprctl", "clients", "-j"])
   }
 
   Repeater {
@@ -37,6 +125,7 @@ RowLayout {
       property color workspaceBorder: isActive
         ? (isOnThisMonitor ? root.foreground : root.remoteBorder)
         : "transparent"
+      property string icon: root.workspaceIcon(modelData)
 
       Layout.preferredWidth: 20
       Layout.preferredHeight: 18
@@ -53,9 +142,9 @@ RowLayout {
 
       Text {
         anchors.centerIn: parent
-        text: String(modelData)
+        text: icon.length > 0 ? icon : String(modelData)
         color: workspaceForeground
-        font.family: root.fontFamily
+        font.family: icon.length > 0 ? root.iconFontFamily : root.fontFamily
         font.pixelSize: 12
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
