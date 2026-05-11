@@ -127,7 +127,7 @@ RowLayout {
         : "transparent"
       property string icon: root.workspaceIcon(modelData)
 
-      Layout.preferredWidth: 20
+      Layout.preferredWidth: 24
       Layout.preferredHeight: 18
       Layout.alignment: Qt.AlignVCenter
 
