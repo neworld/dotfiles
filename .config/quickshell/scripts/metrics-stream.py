@@ -17,6 +17,12 @@ HISTORY_LEN = 40
 NET_SCALE_BPS = 100_000_000 / 8
 TEMP_MIN = 20.0
 TEMP_MAX = 100.0
+PROCESS_PROBE_INTERVAL = 5.0
+PROCESS_CPU_MIN_TOTAL_PERCENT = 30.0
+PROCESS_MEMORY_MIN_PROCESS_RSS = 16 * 1024 ** 2
+PROCESS_MEMORY_MIN_GROUP_RSS = 64 * 1024 ** 2
+PROCESS_TOP_CPU_LIMIT = 3
+PROCESS_TOP_MEMORY_LIMIT = 5
 
 
 def clamp(value, low=0.0, high=100.0):
@@ -48,6 +54,12 @@ def fmt_bytes(byte_count):
 
 def fmt_gib(bytes_value):
     return f"{bytes_value / (1024 ** 3):.1f} GiB"
+
+
+def fmt_process_bytes(bytes_value):
+    if bytes_value >= 1024 ** 3:
+        return f"{bytes_value / (1024 ** 3):.1f} GiB"
+    return f"{bytes_value / (1024 ** 2):.0f} MiB"
 
 
 def fmt_mib_as_gib(mib_value):
@@ -315,6 +327,105 @@ def rounded(values, scale=100.0):
     return [round(clamp(value, 0.0, scale), 1) for value in values]
 
 
+def process_label(name):
+    cleaned = (name or "").strip()
+    if cleaned.startswith("[") and cleaned.endswith("]"):
+        return ""
+    return cleaned or "unknown"
+
+
+def read_process_summary(cpu_samples, last_scan_at, now, cpu_count):
+    elapsed = now - last_scan_at if last_scan_at is not None else 0.0
+    next_cpu_samples = {}
+    cpu_by_name = {}
+    memory_by_name = {}
+    count_by_name = {}
+
+    for proc in psutil.process_iter(["pid", "name", "cpu_times", "memory_info"]):
+        try:
+            info = proc.info
+            label = process_label(info.get("name"))
+            if not label:
+                continue
+
+            cpu_times = info.get("cpu_times")
+            process_time = (cpu_times.user + cpu_times.system) if cpu_times is not None else None
+            if process_time is not None:
+                pid = info["pid"]
+                next_cpu_samples[pid] = process_time
+                previous_time = cpu_samples.get(pid)
+                if previous_time is not None and elapsed > 0:
+                    delta = process_time - previous_time
+                    if delta > 0:
+                        cpu_percent = (delta / elapsed / cpu_count) * 100.0
+                        if cpu_percent > 0:
+                            cpu_by_name[label] = cpu_by_name.get(label, 0.0) + cpu_percent
+
+            memory_info = info.get("memory_info")
+            rss = memory_info.rss if memory_info is not None else 0
+            if rss >= PROCESS_MEMORY_MIN_PROCESS_RSS:
+                memory_by_name[label] = memory_by_name.get(label, 0) + rss
+                count_by_name[label] = count_by_name.get(label, 0) + 1
+        except (psutil.AccessDenied, psutil.NoSuchProcess, psutil.ZombieProcess, OSError):
+            continue
+
+    top_cpu = [
+        {"name": name, "cpu": value}
+        for name, value in sorted(cpu_by_name.items(), key=lambda item: item[1], reverse=True)
+        if value >= PROCESS_CPU_MIN_TOTAL_PERCENT
+    ][:PROCESS_TOP_CPU_LIMIT]
+
+    top_memory = []
+    memory_entries = [
+        (name, value)
+        for name, value in sorted(memory_by_name.items(), key=lambda item: item[1], reverse=True)
+        if value >= PROCESS_MEMORY_MIN_GROUP_RSS
+    ][:PROCESS_TOP_MEMORY_LIMIT]
+    for name, value in memory_entries:
+        top_memory.append(
+            {
+                "name": name,
+                "rss": value,
+                "count": count_by_name.get(name, 0),
+            }
+        )
+
+    return {
+        "top_cpu": top_cpu,
+        "top_memory": top_memory,
+        "cpu_samples": next_cpu_samples,
+    }
+
+
+def process_name_with_count(item):
+    count = item.get("count", 0)
+    if count > 1:
+        return f"{item['name']} x{count}"
+    return item["name"]
+
+
+def top_cpu_lines(process_summary):
+    entries = process_summary.get("top_cpu", [])
+    if not entries:
+        return []
+
+    lines = ["Top CPU:"]
+    for item in entries:
+        lines.append(f"  {item['name']}: {item['cpu']:.1f}% total")
+    return lines
+
+
+def top_memory_lines(process_summary):
+    entries = process_summary.get("top_memory", [])
+    if not entries:
+        return []
+
+    lines = ["Top memory (RSS):"]
+    for item in entries:
+        lines.append(f"  {process_name_with_count(item)}: {fmt_process_bytes(item['rss'])}")
+    return lines
+
+
 def main():
     histories = {
         "cpu_util": deque(maxlen=HISTORY_LEN),
@@ -336,6 +447,11 @@ def main():
     temperature = None
     gpu = None
     probe_at = 0.0
+    process_probe_at = 0.0
+    process_scan_at = None
+    process_cpu_samples = {}
+    process_summary = {"top_cpu": [], "top_memory": []}
+    cpu_count = max(1, psutil.cpu_count() or 1)
 
     while True:
         now = time.monotonic()
@@ -372,6 +488,12 @@ def main():
             gpu = read_gpu()
             probe_at = now + 5.0
 
+        if now >= process_probe_at:
+            process_summary = read_process_summary(process_cpu_samples, process_scan_at, now, cpu_count)
+            process_cpu_samples = process_summary.pop("cpu_samples", {})
+            process_scan_at = now
+            process_probe_at = now + PROCESS_PROBE_INTERVAL
+
         temp = temperature["value"] if temperature is not None else None
 
         histories["cpu_util"].append(cpu)
@@ -393,6 +515,7 @@ def main():
                         f"CPU usage: {cpu:.1f}%",
                         f"Power: {cpu_power:.1f} W" if cpu_power is not None else "Power: n/a",
                     ]
+                    + top_cpu_lines(process_summary)
                 ),
                 "scale": 100,
                 "values": rounded(histories["cpu_util"]),
@@ -424,6 +547,7 @@ def main():
                         f"Usage: {ram:.1f}%",
                         f"Available: {fmt_gib(memory.available)}",
                     ]
+                    + top_memory_lines(process_summary)
                 ),
                 "scale": 100,
                 "values": rounded(histories["cpu_mem"]),
