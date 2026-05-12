@@ -24,11 +24,9 @@ def clamp(value, low=0.0, high=100.0):
 
 
 def ram_usage(memory):
-    cached = getattr(memory, "cached", 0)
-    buffers = getattr(memory, "buffers", 0)
-    slab = getattr(memory, "slab", 0)
-    used = max(0, memory.used - cached - buffers - slab)
-    return used, (used / memory.total) * 100
+    used = max(0, memory.total - memory.available)
+    percent = (used / memory.total) * 100 if memory.total > 0 else 0
+    return used, percent
 
 
 def fmt_rate(bytes_per_sec):
