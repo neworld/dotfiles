@@ -12,7 +12,7 @@ from pathlib import Path
 import psutil
 
 
-INTERVAL = 1.0
+INTERVAL = 2.0
 HISTORY_LEN = 40
 NET_SCALE_BPS = 100_000_000 / 8
 TEMP_MIN = 20.0
