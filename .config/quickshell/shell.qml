@@ -169,7 +169,7 @@ Scope {
           }
 
           ExecWidget {
-            command: "bluetoothctl show 2>/dev/null | awk '/Powered:/ { powered=$2 } /Discoverable:/ { } END { if (powered == \"yes\") print \"\"; else print \"󰂲\" }'"
+            command: "rfkill list bluetooth 2>/dev/null | awk 'BEGIN { icon=\"󰂲\" } /Soft blocked: no/ { soft=1 } /Hard blocked: no/ { hard=1 } END { if (soft && hard) print \"\"; else print icon }'"
             interval: 5000
             foreground: root.foreground
             fontFamily: root.iconFontFamily
