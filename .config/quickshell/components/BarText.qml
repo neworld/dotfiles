@@ -13,6 +13,7 @@ Item {
   property int fontPixelSize: 12
   property real leftPadding: 0
   property real rightPadding: 0
+  property real fixedWidth: 0
   property bool active: false
   property color activeForeground: foreground
 
@@ -20,7 +21,7 @@ Item {
   signal rightClicked()
   signal wheel(real delta)
 
-  Layout.preferredWidth: visible ? label.implicitWidth + leftPadding + rightPadding : 0
+  Layout.preferredWidth: visible ? (fixedWidth > 0 ? fixedWidth : label.implicitWidth + leftPadding + rightPadding) : 0
   Layout.fillHeight: true
   visible: text.length > 0
 

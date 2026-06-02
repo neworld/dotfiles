@@ -15,3 +15,4 @@ PS1='[\u@\h \W]\$ '
 # added by travis gem
 [ -f /home/neworld/.travis/travis.sh ] && source /home/neworld/.travis/travis.sh
 eval "$(mise activate bash)"
+eval "$(~/.local/bin/mise activate bash)"

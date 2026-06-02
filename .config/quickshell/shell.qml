@@ -12,6 +12,8 @@ Scope {
   property color background: "#1a1b26"
   property color warning: "#d7af5f"
   property color critical: "#d75f5f"
+  property color batteryLow: "#f7768e"
+  property color batteryCharging: "#7aa2f7"
   property string fontFamily: "Noto Sans Mono"
   property string iconFontFamily: "JetBrainsMono Nerd Font"
 
@@ -168,6 +170,14 @@ Scope {
             fontFamily: root.iconFontFamily
           }
 
+          BatteryDevices {
+            foreground: root.foreground
+            lowForeground: root.batteryLow
+            chargingForeground: root.batteryCharging
+            fontFamily: root.iconFontFamily
+            onClicked: root.launch("omarchy-menu power")
+          }
+
           ExecWidget {
             command: "rfkill list bluetooth 2>/dev/null | awk 'BEGIN { icon=\"󰂲\" } /Soft blocked: no/ { soft=1 } /Hard blocked: no/ { hard=1 } END { if (soft && hard) print \"\"; else print icon }'"
             interval: 5000
@@ -188,20 +198,20 @@ Scope {
 
           ExecWidget {
             id: volumeWidget
-            command: "mute=$(pamixer --get-mute 2>/dev/null) && volume=$(pamixer --get-volume 2>/dev/null) && awk -v muted=\"$mute\" -v volume=\"$volume\" 'BEGIN { if (muted == \"true\") print \"󰝟\"; else if (volume == 0) print \"󰕿\"; else if (volume < 34) print \"󰕿\"; else if (volume < 67) print \"󰖀\"; else print \"󰕾\" }'"
+            command: "wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{ muted=($0 ~ /\\[MUTED\\]/); volume=int($2 * 100 + 0.5); if (muted) print \"󰝟\"; else if (volume < 34) print \"󰕿\"; else if (volume < 67) print \"󰖀\"; else print \"󰕾\" }'"
             interval: 1000
             foreground: root.foreground
             fontFamily: root.iconFontFamily
-            tooltipCommand: "pamixer --get-volume-human 2>/dev/null | awk '{ print \"Playing at \" $1 }'"
+            tooltipCommand: "wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{ muted=($0 ~ /\\[MUTED\\]/); volume=int($2 * 100 + 0.5); print muted ? \"Muted at \" volume \"%\" : \"Playing at \" volume \"%\" }'"
             leftPadding: 7.5
             rightPadding: 7.5
             onClicked: root.launch("pavucontrol")
             onRightClicked: {
-              root.launch("pamixer -t");
+              root.launch("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle");
               volumeRefresh.restart();
             }
             onWheel: function(delta) {
-              root.launch(delta > 0 ? "pamixer --set-limit 100 -i 5" : "pamixer -d 5");
+              root.launch(delta > 0 ? "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+" : "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-");
               volumeRefresh.restart();
             }
 
@@ -211,21 +221,6 @@ Scope {
               repeat: false
               onTriggered: volumeWidget.refresh()
             }
-          }
-
-          ExecWidget {
-            command: "/home/neworld/.config/quickshell/scripts/battery-status.py"
-            interval: 5000
-            parseJson: true
-            hideWhenEmpty: true
-            foreground: root.foreground
-            lowForeground: root.foreground
-            mediumForeground: root.warning
-            highForeground: root.critical
-            fontFamily: root.iconFontFamily
-            leftPadding: 7.5
-            rightPadding: 7.5
-            onClicked: root.launch("omarchy-menu power")
           }
 
           ExecWidget {

@@ -74,9 +74,11 @@ def fmt_load(value):
     return f"{value:.2f}"
 
 
-def fmt_mbps(bytes_per_sec):
-    mbps = clamp((bytes_per_sec * 8) / 1_000_000, 0, 99)
-    return f"{mbps:.0f}m"
+def fmt_net_display(bytes_per_sec):
+    mbps = max(0, int(((bytes_per_sec * 8) / 1_000_000) + 0.5))
+    if mbps < 100:
+        return f"{mbps}m"
+    return f"{min(mbps, 999)}"
 
 
 def fmt_temp(value):
@@ -468,7 +470,6 @@ def main():
         down_bps = max(0.0, (net.bytes_recv - last_net.bytes_recv) / elapsed)
         up_bps = max(0.0, (net.bytes_sent - last_net.bytes_sent) / elapsed)
         net_bps = down_bps + up_bps
-        net_arrow = "↑" if up_bps > down_bps else "↓"
         net_display_bps = max(down_bps, up_bps)
 
         last_net = net
@@ -611,7 +612,7 @@ def main():
         series.append(
             {
                 "key": "net",
-                "value": f"{net_arrow}{fmt_mbps(net_display_bps)}",
+                "value": fmt_net_display(net_display_bps),
                 "tooltip": "\n".join(
                     [
                         f"Download: {fmt_rate(down_bps)}",
