@@ -29,10 +29,47 @@ def clamp(value, low=0.0, high=100.0):
     return max(low, min(high, value))
 
 
+def read_zfs_arc_reclaimable():
+    arcstats = Path("/proc/spl/kstat/zfs/arcstats")
+    if not arcstats.is_file():
+        return 0
+
+    values = {}
+    try:
+        for line in arcstats.read_text().splitlines():
+            parts = line.split()
+            if len(parts) >= 3 and parts[0] in {"size", "c_min"}:
+                values[parts[0]] = int(parts[2])
+    except (OSError, ValueError):
+        return 0
+
+    return max(0, values.get("size", 0) - values.get("c_min", 0))
+
+
+def read_meminfo_value(name):
+    try:
+        with open("/proc/meminfo", "r", encoding="ascii") as meminfo:
+            prefix = f"{name}:"
+            for line in meminfo:
+                if line.startswith(prefix):
+                    return int(line.split()[1]) * 1024
+    except (OSError, ValueError, IndexError):
+        pass
+    return 0
+
+
 def ram_usage(memory):
-    used = max(0, memory.total - memory.available)
+    arc_reclaimable = read_zfs_arc_reclaimable()
+    sreclaimable = read_meminfo_value("SReclaimable")
+    buffers = getattr(memory, "buffers", 0)
+    cached = getattr(memory, "cached", 0)
+    shared = getattr(memory, "shared", 0)
+    non_arc_cache_excluded = max(0, buffers + cached + sreclaimable - shared)
+    cache_excluded = non_arc_cache_excluded + arc_reclaimable
+    used = max(0, memory.total - memory.free - cache_excluded)
+    usable = max(0, memory.total - used)
     percent = (used / memory.total) * 100 if memory.total > 0 else 0
-    return used, percent
+    return used, percent, usable, cache_excluded, non_arc_cache_excluded, arc_reclaimable
 
 
 def fmt_rate(bytes_per_sec):
@@ -464,7 +501,7 @@ def main():
         load1, load5, load15 = os.getloadavg()
         power_state = read_power_state()
         memory = psutil.virtual_memory()
-        ram_used, ram = ram_usage(memory)
+        ram_used, ram, ram_usable, ram_cache_excluded, ram_non_arc_cache_excluded, ram_arc_reclaimable = ram_usage(memory)
         disk = psutil.disk_usage("/").percent
 
         down_bps = max(0.0, (net.bytes_recv - last_net.bytes_recv) / elapsed)
@@ -544,9 +581,12 @@ def main():
                 "value": fmt_percent(ram),
                 "tooltip": "\n".join(
                     [
-                        f"RAM: {fmt_gib(ram_used)} / {fmt_gib(memory.total)}",
+                        f"RAM used: {fmt_gib(ram_used)} / {fmt_gib(memory.total)}",
                         f"Usage: {ram:.1f}%",
-                        f"Available: {fmt_gib(memory.available)}",
+                        f"Usable: {fmt_gib(ram_usable)}",
+                        f"Cache excluded: {fmt_gib(ram_cache_excluded)} total",
+                        f"  regular cache: {fmt_gib(ram_non_arc_cache_excluded)}",
+                        f"  ZFS ARC: {fmt_gib(ram_arc_reclaimable)}",
                     ]
                     + top_memory_lines(process_summary)
                 ),
@@ -629,7 +669,7 @@ def main():
 
         tooltip_lines = [
             f"CPU: {cpu:.1f}%",
-            f"RAM: {ram:.1f}% ({ram_used / (1024 ** 3):.1f}/{memory.total / (1024 ** 3):.1f} GiB)",
+            f"RAM: {ram:.1f}% ({ram_used / (1024 ** 3):.1f}/{memory.total / (1024 ** 3):.1f} GiB, {ram_usable / (1024 ** 3):.1f} GiB usable)",
             f"Network: down {fmt_rate(down_bps)}, up {fmt_rate(up_bps)}",
             f"Disk /: {disk:.1f}%",
         ]
