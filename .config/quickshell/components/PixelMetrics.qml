@@ -393,18 +393,35 @@ Item {
             }
           }
 
-          Text {
-            text: String(metric.value || "")
-            color: root.metricColor(metric.key)
-            font.family: root.fontFamily
-            font.pixelSize: 12
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignRight
-            leftPadding: 2
-            rightPadding: 2
-            Layout.preferredWidth: 38
+          RowLayout {
+            spacing: 1
+            Layout.preferredWidth: 34
             Layout.alignment: Qt.AlignVCenter
             transform: Translate { y: 2 }
+
+            Text {
+              text: String(metric.direction || "")
+              color: root.metricColor(metric.key)
+              font.family: root.fontFamily
+              font.pixelSize: 12
+              verticalAlignment: Text.AlignVCenter
+              horizontalAlignment: Text.AlignHCenter
+              Layout.preferredWidth: 8
+              Layout.alignment: Qt.AlignVCenter
+            }
+
+            Text {
+              text: String(metric.value || "")
+              color: root.metricColor(metric.key)
+              font.family: root.fontFamily
+              font.pixelSize: 12
+              verticalAlignment: Text.AlignVCenter
+              horizontalAlignment: Text.AlignRight
+              leftPadding: 2
+              rightPadding: 2
+              Layout.preferredWidth: 25
+              Layout.alignment: Qt.AlignVCenter
+            }
 
             MouseArea {
               id: netLabelMouse

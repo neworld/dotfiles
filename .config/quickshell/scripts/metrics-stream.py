@@ -118,6 +118,10 @@ def fmt_net_display(bytes_per_sec):
     return f"{min(mbps, 999)}"
 
 
+def net_direction(down_bps, up_bps):
+    return "↑" if up_bps > down_bps else "↓"
+
+
 def fmt_temp(value):
     return f"{clamp(value, -99, 999):.0f}C"
 
@@ -507,6 +511,7 @@ def main():
         down_bps = max(0.0, (net.bytes_recv - last_net.bytes_recv) / elapsed)
         up_bps = max(0.0, (net.bytes_sent - last_net.bytes_sent) / elapsed)
         net_bps = down_bps + up_bps
+        net_arrow = net_direction(down_bps, up_bps)
         net_display_bps = max(down_bps, up_bps)
 
         last_net = net
@@ -653,6 +658,7 @@ def main():
             {
                 "key": "net",
                 "value": fmt_net_display(net_display_bps),
+                "direction": net_arrow,
                 "tooltip": "\n".join(
                     [
                         f"Download: {fmt_rate(down_bps)}",
