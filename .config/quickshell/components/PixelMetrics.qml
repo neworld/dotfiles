@@ -16,6 +16,7 @@ Item {
   property var cpuMetricOrder: ["cpu_util", "cpu_mem", "cpu_temp"]
   property var gpuMetricOrder: ["gpu_util", "gpu_mem", "gpu_temp"]
   property var metrics: ({})
+  property var batteryDevices: []
   property color graphColor: currentClass === "high" ? highForeground
     : currentClass === "medium" ? mediumForeground
     : lowForeground
@@ -96,6 +97,7 @@ Item {
       root.currentClass = payload.class || "low";
       root.tooltipText = payload.tooltip || "";
       root.metrics = nextMetrics;
+      root.batteryDevices = Array.isArray(payload.batteryDevices) ? payload.batteryDevices : [];
     } catch (error) {
       console.log("metrics parse error", error);
     }

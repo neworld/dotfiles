@@ -289,9 +289,12 @@ def read_upower():
     return result.stdout if result.returncode == 0 else ""
 
 
+def read_battery_devices():
+    return format_devices(read_upower())
+
+
 def main():
-    devices = format_devices(read_upower())
-    print(json.dumps(devices, ensure_ascii=False))
+    print(json.dumps(read_battery_devices(), ensure_ascii=False))
 
 
 if __name__ == "__main__":

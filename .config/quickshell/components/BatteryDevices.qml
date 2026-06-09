@@ -1,11 +1,9 @@
-import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 
 RowLayout {
   id: root
 
-  property int interval: 5000
   property var devices: []
   property color foreground: "#cdd6f4"
   property color lowForeground: "#d75f5f"
@@ -25,21 +23,6 @@ RowLayout {
     return foreground;
   }
 
-  function applyOutput(output) {
-    const trimmed = output.trim();
-    if (trimmed.length === 0) {
-      devices = [];
-      return;
-    }
-
-    try {
-      const payload = JSON.parse(trimmed);
-      devices = Array.isArray(payload) ? payload : [];
-    } catch (error) {
-      devices = [];
-    }
-  }
-
   Repeater {
     model: root.devices
 
@@ -54,21 +37,5 @@ RowLayout {
       fixedWidth: modelData.kind === "laptop" ? root.laptopWidth : root.deviceWidth
       onClicked: root.clicked()
     }
-  }
-
-  Process {
-    id: batteryProcess
-
-    stdout: StdioCollector {
-      onStreamFinished: root.applyOutput(this.text)
-    }
-  }
-
-  Timer {
-    interval: root.interval
-    running: true
-    repeat: true
-    triggeredOnStart: true
-    onTriggered: batteryProcess.exec(["python3", "/home/neworld/.config/quickshell/scripts/battery-status.py"])
   }
 }

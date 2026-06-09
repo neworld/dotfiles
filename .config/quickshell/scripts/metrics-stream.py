@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import importlib.util
 import os
 import re
 import shutil
@@ -13,6 +14,7 @@ import psutil
 
 
 INTERVAL = 2.0
+BATTERY_REFRESH_TICKS = 5
 HISTORY_LEN = 40
 NET_SCALE_BPS = 100_000_000 / 8
 TEMP_MIN = 20.0
@@ -23,6 +25,23 @@ PROCESS_MEMORY_MIN_PROCESS_RSS = 16 * 1024 ** 2
 PROCESS_MEMORY_MIN_GROUP_RSS = 64 * 1024 ** 2
 PROCESS_TOP_CPU_LIMIT = 3
 PROCESS_TOP_MEMORY_LIMIT = 5
+
+
+def load_battery_status_module():
+    path = Path(__file__).with_name("battery-status.py")
+    spec = importlib.util.spec_from_file_location("quickshell_battery_status", path)
+    if spec is None or spec.loader is None:
+        return None
+
+    module = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        return None
+    return module
+
+
+BATTERY_STATUS = load_battery_status_module()
 
 
 def clamp(value, low=0.0, high=100.0):
@@ -56,6 +75,16 @@ def read_meminfo_value(name):
     except (OSError, ValueError, IndexError):
         pass
     return 0
+
+
+def read_battery_devices():
+    if BATTERY_STATUS is None:
+        return []
+
+    try:
+        return BATTERY_STATUS.read_battery_devices()
+    except Exception:
+        return []
 
 
 def ram_usage(memory):
@@ -495,6 +524,8 @@ def main():
     process_cpu_samples = {}
     process_summary = {"top_cpu": [], "top_memory": []}
     cpu_count = max(1, psutil.cpu_count() or 1)
+    tick = 0
+    battery_devices = []
 
     while True:
         now = time.monotonic()
@@ -536,6 +567,9 @@ def main():
             process_cpu_samples = process_summary.pop("cpu_samples", {})
             process_scan_at = now
             process_probe_at = now + PROCESS_PROBE_INTERVAL
+
+        if tick % BATTERY_REFRESH_TICKS == 0:
+            battery_devices = read_battery_devices()
 
         temp = temperature["value"] if temperature is not None else None
 
@@ -693,8 +727,10 @@ def main():
             "class": status_class(cpu, ram, temp),
             "series": series,
             "tooltip": "\n".join(tooltip_lines),
+            "batteryDevices": battery_devices,
         }
         print(json.dumps(payload, ensure_ascii=False), flush=True)
+        tick += 1
         time.sleep(INTERVAL)
 
 

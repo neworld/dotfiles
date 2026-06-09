@@ -152,6 +152,7 @@ Scope {
           }
 
           PixelMetrics {
+            id: pixelMetrics
             foreground: root.foreground
             lowForeground: root.foreground
             mediumForeground: root.warning
@@ -171,6 +172,7 @@ Scope {
           }
 
           BatteryDevices {
+            devices: pixelMetrics.batteryDevices
             foreground: root.foreground
             lowForeground: root.batteryLow
             chargingForeground: root.batteryCharging
