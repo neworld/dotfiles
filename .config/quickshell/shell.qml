@@ -100,6 +100,17 @@ Scope {
           spacing: 0
           z: 1
 
+          DictationWidget {
+            idleForeground: root.foreground
+            recordingForeground: root.critical
+            fontFamily: root.iconFontFamily
+            fontPixelSize: 13
+            textFontFamily: root.fontFamily
+            popupBackground: root.background
+            leftPadding: 7.5
+            rightPadding: 7.5
+          }
+
           ClockWidget {
             id: clockWidget
             foreground: root.foreground
