@@ -135,3 +135,19 @@ eval "$(rbenv init -)"
 PROMPT="%(?:%{$fg_bold[green]%}%m%# ➜ :%{$fg_bold[red]%}➜ )"
 PROMPT+=' %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)'
 eval "$(mise activate zsh)"
+
+# Label the current byobu/tmux window in the status bar (shown as an orange chip,
+# next to the path). `desc some text` to set, `desc` with no args to clear.
+# Claude sessions set this automatically; use it for any other program.
+desc () {
+    if [ -z "$TMUX" ]; then
+        echo "desc: not inside tmux/byobu" >&2
+        return 1
+    fi
+    if [ "$#" -eq 0 ]; then
+        tmux set-option -uw @tab_desc
+    else
+        tmux set-option -w @tab_desc "$*"
+    fi
+}
+
