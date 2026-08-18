@@ -94,7 +94,12 @@ Scope {
 
         RowLayout {
           id: centerModules
+          property real rightClearance: 16
+          property real clockCenteredOffset: width / 2 - clockWidget.x - clockWidget.width / 2
+          property real rightLimitedOffset: rightModules.x - rightClearance - parent.width / 2 - width / 2
+
           anchors.horizontalCenter: parent.horizontalCenter
+          anchors.horizontalCenterOffset: Math.round(Math.min(clockCenteredOffset, rightLimitedOffset))
           anchors.top: parent.top
           anchors.bottom: parent.bottom
           spacing: 0
@@ -152,7 +157,9 @@ Scope {
           anchors.rightMargin: 8
           spacing: 0
 
-          CodexUsage {
+          AiUsage {
+            command: "codexbar --format '{weekly_pct}%' 2>/dev/null || true"
+            brandIcon: "\ue7cf"
             foreground: root.foreground
             lowForeground: root.foreground
             mediumForeground: root.warning
@@ -160,6 +167,18 @@ Scope {
             fontFamily: root.iconFontFamily
             brandFontFamily: "Font Awesome 7 Brands"
             onClicked: root.launch("xdg-open https://chatgpt.com/codex/settings/usage")
+          }
+
+          AiUsage {
+            command: "ai-usagebar --vendor anthropic --format '{session_pct}% · {weekly_pct}%' --json 2>/dev/null || true"
+            brandIcon: "\ue861"
+            foreground: root.foreground
+            lowForeground: root.foreground
+            mediumForeground: root.warning
+            highForeground: root.critical
+            fontFamily: root.iconFontFamily
+            brandFontFamily: "Font Awesome 7 Brands"
+            onClicked: root.launch("xdg-open https://claude.ai/settings/usage")
           }
 
           PixelMetrics {

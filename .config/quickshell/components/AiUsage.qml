@@ -11,6 +11,8 @@ Item {
   property color highForeground: "#d75f5f"
   property string fontFamily: "JetBrainsMono Nerd Font"
   property string brandFontFamily: "Font Awesome 7 Brands"
+  required property string command
+  required property string brandIcon
   property string usageText: ""
   property string tooltipText: ""
   property string currentClass: "low"
@@ -40,7 +42,7 @@ Item {
   }
 
   Process {
-    id: codexProcess
+    id: usageProcess
     stdout: SplitParser {
       onRead: function(data) {
         root.applyLine(data);
@@ -53,7 +55,7 @@ Item {
     running: true
     repeat: true
     triggeredOnStart: true
-    onTriggered: codexProcess.exec(["sh", "-c", "codexbar --format '{session_pct}% · {weekly_pct}%  ' 2>/dev/null || true"])
+    onTriggered: usageProcess.exec(["sh", "-c", root.command])
   }
 
   RowLayout {
@@ -62,7 +64,7 @@ Item {
     spacing: 4
 
     Text {
-      text: "\ue7cf"
+      text: root.brandIcon
       color: root.statusColor
       font.family: root.brandFontFamily
       font.pixelSize: 12
