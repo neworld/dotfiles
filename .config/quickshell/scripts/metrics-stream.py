@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import importlib.util
+import math
 import os
 import re
 import shutil
@@ -15,6 +16,7 @@ import psutil
 
 INTERVAL = 2.0
 BATTERY_REFRESH_TICKS = 5
+DISK_REFRESH_TICKS = 30
 HISTORY_LEN = 40
 NET_SCALE_BPS = 100_000_000 / 8
 TEMP_MIN = 20.0
@@ -25,6 +27,10 @@ PROCESS_MEMORY_MIN_PROCESS_RSS = 16 * 1024 ** 2
 PROCESS_MEMORY_MIN_GROUP_RSS = 64 * 1024 ** 2
 PROCESS_TOP_CPU_LIMIT = 3
 PROCESS_TOP_MEMORY_LIMIT = 5
+DISK_BACKEND = os.environ.get("QUICKSHELL_DISK_BACKEND", "zfs")
+DISK_TARGET = os.environ.get(
+    "QUICKSHELL_DISK_TARGET", "tank" if DISK_BACKEND == "zfs" else "/"
+)
 
 
 def load_battery_status_module():
@@ -136,8 +142,97 @@ def fmt_percent(value):
     return f"{clamp(value):.0f}%"
 
 
+def fmt_disk_percent(value):
+    return f"{math.ceil(clamp(value))}%"
+
+
 def fmt_load(value):
     return f"{value:.2f}"
+
+
+def disk_status_class(percent):
+    if percent > 95:
+        return "high"
+    if percent > 90:
+        return "orange"
+    if percent >= 85:
+        return "medium"
+    return "low"
+
+
+def read_zfs_disk_usage(pool):
+    try:
+        result = subprocess.run(
+            [
+                "zpool",
+                "list",
+                "-Hp",
+                "-o",
+                "name,size,alloc,free,cap,frag,health",
+                pool,
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=2.0,
+        )
+        if result.returncode != 0:
+            return None
+
+        name, size, allocated, free, _capacity, fragmentation, health = (
+            result.stdout.strip().split()
+        )
+        size = int(size)
+        allocated = int(allocated)
+        free = int(free)
+        percent = allocated / size * 100 if size > 0 else 0.0
+        fragmentation_text = (
+            f"{float(fragmentation):.0f}%" if fragmentation != "-" else "n/a"
+        )
+        return {
+            "percent": percent,
+            "tooltip": "\n".join(
+                [
+                    f"ZFS pool: {name}",
+                    f"Usage: {percent:.1f}%",
+                    f"Allocated: {fmt_bytes(allocated)}",
+                    f"Free: {fmt_bytes(free)}",
+                    f"Pool size: {fmt_bytes(size)}",
+                    f"Fragmentation: {fragmentation_text}",
+                    f"Health: {health}",
+                ]
+            ),
+        }
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
+
+
+def read_filesystem_disk_usage(path):
+    try:
+        usage = psutil.disk_usage(path)
+    except (OSError, ValueError):
+        return None
+
+    return {
+        "percent": usage.percent,
+        "tooltip": "\n".join(
+            [
+                f"Filesystem: {path}",
+                f"Usage: {usage.percent:.1f}%",
+                f"Used: {fmt_bytes(usage.used)}",
+                f"Available: {fmt_bytes(usage.free)}",
+                f"Total: {fmt_bytes(usage.total)}",
+            ]
+        ),
+    }
+
+
+def read_disk_usage():
+    if DISK_BACKEND == "zfs":
+        return read_zfs_disk_usage(DISK_TARGET)
+    if DISK_BACKEND == "filesystem":
+        return read_filesystem_disk_usage(DISK_TARGET)
+    return None
 
 
 def fmt_net_display(bytes_per_sec):
@@ -518,6 +613,7 @@ def main():
     cpu_power = None
     temperature = None
     gpu = None
+    disk = None
     probe_at = 0.0
     process_probe_at = 0.0
     process_scan_at = None
@@ -537,7 +633,6 @@ def main():
         power_state = read_power_state()
         memory = psutil.virtual_memory()
         ram_used, ram, ram_usable, ram_cache_excluded, ram_non_arc_cache_excluded, ram_arc_reclaimable = ram_usage(memory)
-        disk = psutil.disk_usage("/").percent
 
         down_bps = max(0.0, (net.bytes_recv - last_net.bytes_recv) / elapsed)
         up_bps = max(0.0, (net.bytes_sent - last_net.bytes_sent) / elapsed)
@@ -570,6 +665,8 @@ def main():
 
         if tick % BATTERY_REFRESH_TICKS == 0:
             battery_devices = read_battery_devices()
+        if disk is None or tick % DISK_REFRESH_TICKS == 0:
+            disk = read_disk_usage()
 
         temp = temperature["value"] if temperature is not None else None
 
@@ -707,12 +804,27 @@ def main():
             },
         )
 
+        if disk is not None:
+            series.append(
+                {
+                    "key": "disk",
+                    "value": fmt_disk_percent(disk["percent"]),
+                    "tooltip": disk["tooltip"],
+                    "class": disk_status_class(disk["percent"]),
+                    "scale": 100,
+                    "values": [],
+                }
+            )
+
         tooltip_lines = [
             f"CPU: {cpu:.1f}%",
             f"RAM: {ram:.1f}% ({ram_used / (1024 ** 3):.1f}/{memory.total / (1024 ** 3):.1f} GiB, {ram_usable / (1024 ** 3):.1f} GiB usable)",
             f"Network: down {fmt_rate(down_bps)}, up {fmt_rate(up_bps)}",
-            f"Disk /: {disk:.1f}%",
         ]
+        if disk is not None:
+            tooltip_lines.append(
+                f"Disk {DISK_BACKEND}:{DISK_TARGET}: {disk['percent']:.1f}%"
+            )
         if gpu is not None:
             tooltip_lines.append(
                 "GPU: "

@@ -8,6 +8,7 @@ Item {
   property color foreground: "#cdd6f4"
   property color lowForeground: foreground
   property color mediumForeground: "#d7af5f"
+  property color orangeForeground: "#ff9e64"
   property color highForeground: "#d75f5f"
   property color metricIconForeground: "#cdd6f4"
   property string fontFamily: "JetBrainsMono Nerd Font"
@@ -25,6 +26,11 @@ Item {
   signal rightClicked()
 
   function metricColor(key) {
+    const itemClass = String(metric(key).class || "");
+    if (itemClass === "high") return highForeground;
+    if (itemClass === "orange") return orangeForeground;
+    if (itemClass === "medium") return mediumForeground;
+
     const colors = {
       cpu_util: "#7aa2f7",
       gpu_util: "#7aa2f7",
@@ -441,6 +447,60 @@ Item {
               }
             }
           }
+        }
+      }
+    }
+
+    Item {
+      id: diskWidget
+
+      property var diskMetric: root.metric("disk")
+      property string popupText: String(diskMetric.tooltip || diskMetric.value || "")
+
+      visible: String(diskMetric.value || "").length > 0
+      Layout.preferredWidth: diskRow.implicitWidth
+      Layout.preferredHeight: 18
+      Layout.alignment: Qt.AlignVCenter
+
+      RowLayout {
+        id: diskRow
+        anchors.fill: parent
+        spacing: 4
+
+        Text {
+          text: "󰋊"
+          color: root.metricColor("disk")
+          font.family: root.fontFamily
+          font.pixelSize: 14
+          verticalAlignment: Text.AlignVCenter
+          Layout.alignment: Qt.AlignVCenter
+        }
+
+        Text {
+          text: String(diskWidget.diskMetric.value || "")
+          color: root.metricColor("disk")
+          font.family: root.fontFamily
+          font.pixelSize: 12
+          verticalAlignment: Text.AlignVCenter
+          horizontalAlignment: Text.AlignRight
+          Layout.alignment: Qt.AlignVCenter
+          transform: Translate { y: 2 }
+        }
+      }
+
+      MouseArea {
+        id: diskMouse
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.NoButton
+
+        BarTooltip {
+          visible: diskMouse.containsMouse && diskWidget.popupText.length > 0
+          anchorItem: diskMouse
+          text: diskWidget.popupText
+          foreground: root.metricColor("disk")
+          background: "#1a1b26"
+          fontFamily: root.fontFamily
         }
       }
     }

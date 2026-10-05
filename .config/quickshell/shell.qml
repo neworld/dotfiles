@@ -11,6 +11,7 @@ Scope {
   property color foreground: "#cdd6f4"
   property color background: "#1a1b26"
   property color warning: "#d7af5f"
+  property color orange: "#ff9e64"
   property color critical: "#d75f5f"
   property color batteryLow: "#f7768e"
   property color batteryCharging: "#7aa2f7"
@@ -158,7 +159,7 @@ Scope {
           spacing: 0
 
           AiUsage {
-            command: "codexbar --format '{weekly_pct}%' 2>/dev/null || true"
+            command: "python3 ~/.config/quickshell/scripts/ai-usage-pressure.py codex 2>/dev/null || true"
             brandIcon: "\ue7cf"
             foreground: root.foreground
             lowForeground: root.foreground
@@ -170,7 +171,7 @@ Scope {
           }
 
           AiUsage {
-            command: "ai-usagebar --vendor anthropic --format '{session_pct}% · {weekly_pct}%' --json 2>/dev/null || true"
+            command: "python3 ~/.config/quickshell/scripts/ai-usage-pressure.py anthropic 2>/dev/null || true"
             brandIcon: "\ue861"
             foreground: root.foreground
             lowForeground: root.foreground
@@ -186,6 +187,7 @@ Scope {
             foreground: root.foreground
             lowForeground: root.foreground
             mediumForeground: root.warning
+            orangeForeground: root.orange
             highForeground: root.critical
             fontFamily: root.iconFontFamily
             onClicked: root.launch("omarchy-launch-or-focus-tui btop")

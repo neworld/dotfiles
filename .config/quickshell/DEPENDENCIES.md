@@ -27,6 +27,7 @@ yay -S whisper.cpp-model-small        # speech-to-text model for dictation
 ```sh
 sudo pacman -S --needed power-profiles-daemon   # adds power-profile to the metrics widget
 # nvidia-utils                                    # only for NVIDIA GPU metrics; not needed on Intel Arc
+# zfs-utils                                       # zpool-backed disk metric (defaults to pool "tank")
 ```
 
 ---
@@ -56,6 +57,7 @@ sudo pacman -S --needed power-profiles-daemon   # adds power-profile to the metr
 | `playerctl` | media / now-playing widget |
 | `upower` | battery devices |
 | `lm_sensors` | CPU temperatures (metrics) |
+| `zfs-utils` | `zpool` — ZFS pool capacity, fragmentation, and health metric |
 | `ddcutil` | external-monitor brightness (Displays widget) |
 | `networkmanager` | `nmcli` — Wi-Fi/ethernet indicator |
 | `util-linux` | `rfkill` — Bluetooth indicator |
