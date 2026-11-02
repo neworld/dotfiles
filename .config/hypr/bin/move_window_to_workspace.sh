@@ -30,8 +30,9 @@ elif [[ "$direction" == "left" ]]; then
         target=$((target - 1))
     done
     # If no free workspace to the left, do nothing
+    [[ $target -ge 1 ]] || exit 0
 fi
 
 
-hyprctl dispatch movetoworkspacesilent "$target"
-hyprctl dispatch focusworkspaceoncurrentmonitor "$target"
+hyprctl dispatch "hl.dsp.window.move({ workspace = \"$target\", follow = false })"
+hyprctl dispatch "hl.dsp.focus({ workspace = \"$target\", on_current_monitor = true })"

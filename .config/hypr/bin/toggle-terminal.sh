@@ -5,13 +5,7 @@
 SPECIAL_NAME="terminal"         # change if named; use "" for unnamed
 # ──────────────────────────────────────────────
 
-if [ -z "$SPECIAL_NAME" ]; then
-    TOGGLE_CMD="togglespecialworkspace"
-    WS_ARG=""
-else
-    TOGGLE_CMD="togglespecialworkspace $SPECIAL_NAME"
-    WS_ARG="special:$SPECIAL_NAME"
-fi
+TOGGLE_CMD="hl.dsp.workspace.toggle_special(\"$SPECIAL_NAME\")"
 
 # Get currently focused monitor index
 # current_mon_idx=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .id')
@@ -25,7 +19,7 @@ fi
 # Disable cursor warping during switches (cleaner animation)
 # hyprctl keyword cursor:no_warps 1 >/dev/null
 
-hyprctl dispatch focusmonitor 0
-hyprctl dispatch $TOGGLE_CMD
+hyprctl dispatch 'hl.dsp.focus({ monitor = 0 })'
+hyprctl dispatch "$TOGGLE_CMD"
 
 # hyprctl keyword cursor:no_warps 0 >/dev/null

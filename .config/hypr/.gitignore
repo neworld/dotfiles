@@ -1,2 +1,4 @@
 monitors.conf
 variables_custom.conf
+monitors.lua
+variables_custom.lua

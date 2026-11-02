@@ -292,7 +292,7 @@ def cmd_send(text):
         pass
     if addr:
         subprocess.run(
-            ["hyprctl", "dispatch", "focuswindow", "address:" + addr],
+            ["hyprctl", "dispatch", f'hl.dsp.focus({{ window = "address:{addr}" }})'],
             capture_output=True,
         )
         time.sleep(0.12)
